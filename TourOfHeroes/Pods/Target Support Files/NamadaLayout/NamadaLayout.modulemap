@@ -1,0 +1,6 @@
+framework module NamadaLayout {
+  umbrella header "NamadaLayout-umbrella.h"
+
+  export *
+  module * { export * }
+}
