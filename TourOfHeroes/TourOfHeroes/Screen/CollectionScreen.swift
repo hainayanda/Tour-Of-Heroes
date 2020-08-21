@@ -10,7 +10,7 @@ import UIKit
 
 import NamadaLayout
 
-class CollectionController: UIViewController {
+class CollectionScreen: UIViewController {
     
     lazy var collectionLayout: UICollectionViewFlowLayout = .init()
     lazy var collectionView: UICollectionView = .init(
@@ -25,8 +25,9 @@ class CollectionController: UIViewController {
     
     func layoutView() {
         makeLayout { vcLayout in
-            
+            vcLayout.put(collectionView) { collectionLayout in
+                collectionLayout.fillParent()
+            }
         }
     }
 }
-
