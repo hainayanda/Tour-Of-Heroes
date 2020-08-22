@@ -26,11 +26,11 @@ class LargeHeroCell: CollectionCellLayoutable {
     override func layoutChild(_ thisLayout: ViewLayout) {
         thisLayout.put(heroImage) { imgLayout in
             imgLayout.fixToParent(.fullTop, with: .init(inset: 18))
+            imgLayout.size(equalWith: .init(width: <#T##CGFloat#>, height: <#T##CGFloat#>))
         }
         thisLayout.put(heroLabel) { labelLayout in
             labelLayout.atBottom(of: heroImage, spacing: 9)
             labelLayout.fixToParent(.fullTop, with: .init(inset: 18))
-            
         }
     }
 }

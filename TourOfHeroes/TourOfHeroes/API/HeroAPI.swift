@@ -15,6 +15,8 @@ public protocol HeroAPIManager: APIManager {
 
 public class HeroAPI: HeroAPIManager {
     public static var instance: HeroAPIManager = HeroAPI()
+    
+    public var timeOut: TimeInterval = 15
     var baseUrl: String = "https://api.opendota.com/api"
     
     public func getAllHeroes() -> APIPromise<[Hero]> {

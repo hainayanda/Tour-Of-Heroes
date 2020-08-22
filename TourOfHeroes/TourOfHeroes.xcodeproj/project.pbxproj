@@ -16,8 +16,12 @@
 		73AA020024EFDE18003A9DD2 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 73AA01FE24EFDE18003A9DD2 /* LaunchScreen.storyboard */; };
 		73AA020B24EFDE19003A9DD2 /* TourOfHeroesTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 73AA020A24EFDE19003A9DD2 /* TourOfHeroesTests.swift */; };
 		73AA021624EFDE19003A9DD2 /* TourOfHeroesUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 73AA021524EFDE19003A9DD2 /* TourOfHeroesUITests.swift */; };
+		73CE794F24F0D0F70022427E /* Promise.swift in Sources */ = {isa = PBXBuildFile; fileRef = 73CE794E24F0D0F70022427E /* Promise.swift */; };
+		73CE795224F0D1ED0022427E /* RepositoryPromise.swift in Sources */ = {isa = PBXBuildFile; fileRef = 73CE795124F0D1ED0022427E /* RepositoryPromise.swift */; };
+		73CE795424F0FC7A0022427E /* APIAggregator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 73CE795324F0FC7A0022427E /* APIAggregator.swift */; };
+		73CE795824F0FDA30022427E /* APIQueueHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 73CE795724F0FDA30022427E /* APIQueueHandler.swift */; };
+		73CE795C24F11F940022427E /* Atomic.swift in Sources */ = {isa = PBXBuildFile; fileRef = 73CE795B24F11F940022427E /* Atomic.swift */; };
 		73D8AAD924F01EFD000FB39D /* HeroWithStat.swift in Sources */ = {isa = PBXBuildFile; fileRef = 73D8AAD824F01EFD000FB39D /* HeroWithStat.swift */; };
-		73D8AADD24F02260000FB39D /* ModelRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 73D8AADC24F02260000FB39D /* ModelRepository.swift */; };
 		73D8AADF24F02381000FB39D /* HeroRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 73D8AADE24F02381000FB39D /* HeroRepository.swift */; };
 		73F22B4B24F0067700B5D14A /* HeroCollectionViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 73F22B4A24F0067700B5D14A /* HeroCollectionViewModel.swift */; };
 		73F22B5124F006F500B5D14A /* LargeHeroCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 73F22B5024F006F500B5D14A /* LargeHeroCell.swift */; };
@@ -69,8 +73,12 @@
 		73AA021124EFDE19003A9DD2 /* TourOfHeroesUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = TourOfHeroesUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		73AA021524EFDE19003A9DD2 /* TourOfHeroesUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TourOfHeroesUITests.swift; sourceTree = "<group>"; };
 		73AA021724EFDE19003A9DD2 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		73CE794E24F0D0F70022427E /* Promise.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Promise.swift; sourceTree = "<group>"; };
+		73CE795124F0D1ED0022427E /* RepositoryPromise.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RepositoryPromise.swift; sourceTree = "<group>"; };
+		73CE795324F0FC7A0022427E /* APIAggregator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = APIAggregator.swift; sourceTree = "<group>"; };
+		73CE795724F0FDA30022427E /* APIQueueHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = APIQueueHandler.swift; sourceTree = "<group>"; };
+		73CE795B24F11F940022427E /* Atomic.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Atomic.swift; sourceTree = "<group>"; };
 		73D8AAD824F01EFD000FB39D /* HeroWithStat.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HeroWithStat.swift; sourceTree = "<group>"; };
-		73D8AADC24F02260000FB39D /* ModelRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModelRepository.swift; sourceTree = "<group>"; };
 		73D8AADE24F02381000FB39D /* HeroRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HeroRepository.swift; sourceTree = "<group>"; };
 		73F22B4A24F0067700B5D14A /* HeroCollectionViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HeroCollectionViewModel.swift; sourceTree = "<group>"; };
 		73F22B5024F006F500B5D14A /* LargeHeroCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LargeHeroCell.swift; sourceTree = "<group>"; };
@@ -185,21 +193,21 @@
 			path = TourOfHeroesUITests;
 			sourceTree = "<group>";
 		};
+		73CE795024F0D1DF0022427E /* Base */ = {
+			isa = PBXGroup;
+			children = (
+				73CE795124F0D1ED0022427E /* RepositoryPromise.swift */,
+			);
+			path = Base;
+			sourceTree = "<group>";
+		};
 		73D8AADA24F02246000FB39D /* ModelRepository */ = {
 			isa = PBXGroup;
 			children = (
-				73D8AADB24F02251000FB39D /* Base */,
+				73CE795024F0D1DF0022427E /* Base */,
 				73D8AADE24F02381000FB39D /* HeroRepository.swift */,
 			);
 			path = ModelRepository;
-			sourceTree = "<group>";
-		};
-		73D8AADB24F02251000FB39D /* Base */ = {
-			isa = PBXGroup;
-			children = (
-				73D8AADC24F02260000FB39D /* ModelRepository.swift */,
-			);
-			path = Base;
 			sourceTree = "<group>";
 		};
 		73F22B4924F0066000B5D14A /* VCModel */ = {
@@ -257,6 +265,8 @@
 			children = (
 				73F22B5A24F00D6500B5D14A /* Initializable.swift */,
 				73F22B5D24F00DFA00B5D14A /* ThreadHelper.swift */,
+				73CE794E24F0D0F70022427E /* Promise.swift */,
+				73CE795B24F11F940022427E /* Atomic.swift */,
 			);
 			path = Utilities;
 			sourceTree = "<group>";
@@ -268,6 +278,8 @@
 				73F22B5524F00B4100B5D14A /* APIResult.swift */,
 				73F22B5724F00C5600B5D14A /* APIRequest.swift */,
 				73F22B6224F0101500B5D14A /* APIManager.swift */,
+				73CE795324F0FC7A0022427E /* APIAggregator.swift */,
+				73CE795724F0FDA30022427E /* APIQueueHandler.swift */,
 			);
 			path = Base;
 			sourceTree = "<group>";
@@ -551,22 +563,26 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				73CE795424F0FC7A0022427E /* APIAggregator.swift in Sources */,
 				73D8AAD924F01EFD000FB39D /* HeroWithStat.swift in Sources */,
-				73D8AADD24F02260000FB39D /* ModelRepository.swift in Sources */,
 				73F22B6324F0101500B5D14A /* APIManager.swift in Sources */,
 				73F22B5124F006F500B5D14A /* LargeHeroCell.swift in Sources */,
 				73F22B6524F0108C00B5D14A /* HeroStat.swift in Sources */,
+				73CE794F24F0D0F70022427E /* Promise.swift in Sources */,
+				73CE795224F0D1ED0022427E /* RepositoryPromise.swift in Sources */,
 				73AA01F824EFDE16003A9DD2 /* CollectionScreen.swift in Sources */,
 				73F22B5424F00AED00B5D14A /* APIPromise.swift in Sources */,
 				73AA01F424EFDE16003A9DD2 /* AppDelegate.swift in Sources */,
 				73F22B4B24F0067700B5D14A /* HeroCollectionViewModel.swift in Sources */,
 				73F22B6124F00FE500B5D14A /* HeroAPI.swift in Sources */,
 				73F22B5E24F00DFA00B5D14A /* ThreadHelper.swift in Sources */,
+				73CE795824F0FDA30022427E /* APIQueueHandler.swift in Sources */,
 				73F22B5624F00B4100B5D14A /* APIResult.swift in Sources */,
 				73F22B5824F00C5600B5D14A /* APIRequest.swift in Sources */,
 				73D8AADF24F02381000FB39D /* HeroRepository.swift in Sources */,
 				73F22B6724F0136E00B5D14A /* Hero.swift in Sources */,
 				73F22B5B24F00D6500B5D14A /* Initializable.swift in Sources */,
+				73CE795C24F11F940022427E /* Atomic.swift in Sources */,
 				73AA01F624EFDE16003A9DD2 /* SceneDelegate.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
