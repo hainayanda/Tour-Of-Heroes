@@ -18,13 +18,14 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         // This delegate does not imply the connecting scene or session are new (see `application:configurationForConnectingSceneSession` instead).
         guard let windowScene = (scene as? UIWindowScene) else { return }
         let window = UIWindow(windowScene: windowScene)
-        let heroScreen = CollectionScreen()
-        let heroVM = HeroCollectionViewModel()
+        let heroScreen = HeroMainScreen()
+        let heroVM = HeroMainScreenVM()
+        heroVM.apply(to: heroScreen)
         let navigationScreen = UINavigationController(rootViewController: heroScreen)
         window.rootViewController = navigationScreen
         window.makeKeyAndVisible()
-        heroVM.bind(with: heroScreen)
         self.window = window
+        
     }
 
     func sceneDidDisconnect(_ scene: UIScene) {

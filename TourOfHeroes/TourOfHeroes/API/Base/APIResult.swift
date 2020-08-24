@@ -39,7 +39,7 @@ public extension ParseableFromJSON where Self: Codable {
 
 extension Array: ParseableFromJSON where Element: Codable {
     public static func parse(from jsonData: Data) -> ParseableFromJSON? {
-        return try? JSONDecoder().decode(Self.self, from: jsonData)
+        return try? JSONDecoder().decode([Element].self, from: jsonData)
     }
     
 }

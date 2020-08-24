@@ -9,6 +9,7 @@
 import Foundation
 
 open class RepositoryPromise<Result>: Dropable {
+    @discardableResult
     open func then(run: @escaping (Result) -> Void, whenFailed failClosure: @escaping (Error) -> Void) -> RepositoryPromise<Result> {
         return self
     }

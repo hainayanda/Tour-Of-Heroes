@@ -11,62 +11,51 @@ import RealmSwift
 import Alamofire
 
 protocol HeroRepositoryManager {
-    func getHero(withId identifier: Int) -> RepositoryPromise<HeroWithStat>
-    func getAllHero() -> RepositoryPromise<[HeroWithStat]>
+    func getHero(withId identifier: Int) -> RepositoryPromise<Hero>
+    func getAllHero() -> RepositoryPromise<[Hero]>
 }
 
 public class HeroRepository: HeroRepositoryManager {
-    func getHero(withId identifier: Int) -> RepositoryPromise<HeroWithStat> {
+    func getHero(withId identifier: Int) -> RepositoryPromise<Hero> {
         return IdentifiedHeroRequest(identifier: identifier, ignoreAPIWhenPresent: true)
     }
-    func getAllHero() -> RepositoryPromise<[HeroWithStat]> {
+    func getAllHero() -> RepositoryPromise<[Hero]> {
         return AllHeroesRequest()
     }
 }
 
-protocol HeroWithStatsAggregator {
+protocol HeroWithStatsAPIGetter {
     var apiManager: HeroAPIManager { get }
-    func getHeroes(then : @escaping ([HeroWithStat]) -> Void, whenFailed failClosure: @escaping (Error) -> Void) -> Dropable
+    func getHeroes(then : @escaping ([Hero]) -> Void, whenFailed failClosure: @escaping (Error) -> Void) -> Dropable
 }
 
-extension HeroWithStatsAggregator {
-    public func getHeroes(then successClosure: @escaping ([HeroWithStat]) -> Void, whenFailed failClosure: @escaping (Error) -> Void) -> Dropable {
-        apiManager.getAllHeroes().aggregate(with: apiManager.getAllHeroStats())
-            .then(run: { heroResult, heroesStatResults in
-                guard let heroes = heroResult.parsedResponse, let heroStats = heroesStatResults.parsedResponse else {
+extension HeroWithStatsAPIGetter {
+    public func getHeroes(then successClosure: @escaping ([Hero]) -> Void, whenFailed failClosure: @escaping (Error) -> Void) -> Dropable {
+        apiManager.getAllHeroes()
+            .then(run: { result in
+                guard let heroes = result.parsedResponse else {
                     failClosure(APIError(description: "Failed to parse Heroes"))
                     return
                 }
-                successClosure(
-                    heroes.compactMap { hero in
-                        guard let stat = heroStats.first(where: { $0.id == hero.id }) else { return nil }
-                        return HeroWithStat(hero: hero, withStats: stat)
-                    }
-                )
-            }, whenFailed: { captured in
-                guard let error = captured.firstCapturedError ?? captured.secondCapturedError else {
-                    failClosure(APIError(description: "Unknown Error"))
-                    return
-                }
-                failClosure(error)
-            }
+                successClosure(heroes)
+            }, whenFailed: failClosure
         )
     }
 }
 
 protocol HeroWithStatsCache {
-    static func getCachedHeroes(then run: @escaping ([HeroWithStat]?) -> Void) -> DispatchWorkItem
-    static func putToCache(_ heroes: [HeroWithStat])
+    static func getCachedHeroes(then run: @escaping ([Hero]?) -> Void) -> DispatchWorkItem
+    static func putToCache(_ heroes: [Hero])
 }
 
 extension HeroWithStatsCache {
-    static func getCachedHeroes(then run: @escaping ([HeroWithStat]?) -> Void) -> DispatchWorkItem {
+    static func getCachedHeroes(then run: @escaping ([Hero]?) -> Void) -> DispatchWorkItem {
         let worker = DispatchWorkItem {
             guard let realm = try? Realm() else {
                 run(nil)
                 return
             }
-            let result = Array(realm.objects(HeroWithStat.self))
+            let result = Array(realm.objects(Hero.self))
             dispatchOnMainThread {
                 run(result)
             }
@@ -77,10 +66,11 @@ extension HeroWithStatsCache {
         return worker
     }
     
-    static func putToCache(_ heroes: [HeroWithStat]) {
+    static func putToCache(_ heroes: [Hero]) {
         guard let realm = try? Realm() else { return }
         do {
             try realm.write {
+                realm.delete(realm.objects(Hero.self))
                 realm.add(heroes)
             }
         } catch {
@@ -89,7 +79,7 @@ extension HeroWithStatsCache {
     }
 }
 
-public class AllHeroesRequest: RepositoryPromise<[HeroWithStat]>, HeroWithStatsAggregator, HeroWithStatsCache {
+public class AllHeroesRequest: RepositoryPromise<[Hero]>, HeroWithStatsAPIGetter, HeroWithStatsCache {
     var apiManager: HeroAPIManager = HeroAPI.instance
     private var dropableRequest: Dropable?
     private var worker: DispatchWorkItem?
@@ -99,7 +89,7 @@ public class AllHeroesRequest: RepositoryPromise<[HeroWithStat]>, HeroWithStatsA
         worker?.cancel()
     }
     
-    public override func then(run: @escaping ([HeroWithStat]) -> Void, whenFailed failClosure: @escaping (Error) -> Void) -> Self {
+    public override func then(run: @escaping ([Hero]) -> Void, whenFailed failClosure: @escaping (Error) -> Void) -> Self {
         defer {
             let worker = Self.getCachedHeroes { heroes in
                 guard let heroes = heroes else {
@@ -121,7 +111,7 @@ public class AllHeroesRequest: RepositoryPromise<[HeroWithStat]>, HeroWithStatsA
     }
 }
 
-public class IdentifiedHeroRequest: RepositoryPromise<HeroWithStat>, HeroWithStatsAggregator, HeroWithStatsCache {
+public class IdentifiedHeroRequest: RepositoryPromise<Hero>, HeroWithStatsAPIGetter, HeroWithStatsCache {
     var apiManager: HeroAPIManager = HeroAPI.instance
     public let identifier: Int
     public let ignoreAPIWhenPresent: Bool
@@ -138,7 +128,7 @@ public class IdentifiedHeroRequest: RepositoryPromise<HeroWithStat>, HeroWithSta
         worker?.cancel()
     }
     
-    public override func then(run: @escaping (HeroWithStat) -> Void, whenFailed failClosure: @escaping (Error) -> Void) -> Self {
+    public override func then(run: @escaping (Hero) -> Void, whenFailed failClosure: @escaping (Error) -> Void) -> Self {
         let retainedId: Int = self.identifier
         let ignoreAPIWhenPresent = self.ignoreAPIWhenPresent
         defer {
@@ -167,14 +157,14 @@ public class IdentifiedHeroRequest: RepositoryPromise<HeroWithStat>, HeroWithSta
         return self
     }
     
-    func getCachedHero(then run: @escaping (HeroWithStat?) -> Void) -> DispatchWorkItem {
+    func getCachedHero(then run: @escaping (Hero?) -> Void) -> DispatchWorkItem {
         let retainedId: Int = self.identifier
         let worker = DispatchWorkItem {
             guard let realm = try? Realm() else {
                 run(nil)
                 return
             }
-            let result = realm.objects(HeroWithStat.self).filter("id == \(retainedId)").first
+            let result = realm.objects(Hero.self).filter("id == \(retainedId)").first
             run(result)
         }
         defer {
