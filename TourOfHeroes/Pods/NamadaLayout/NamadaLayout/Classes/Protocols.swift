@@ -36,6 +36,7 @@ public protocol AreaLayoutBuilder: LayoutBuilder, LayoutWithEdges {
 }
 
 public protocol LayoutCompatible {
+    var shouldAutoTranslatesAutoresizingMaskIntoConstraints: Bool { get }
     var viewForLayout: UIView { get }
     var layoutViewController: UIViewController? { get }
     var layout: ViewLayout { get }
@@ -55,7 +56,7 @@ public protocol StatedViewModel {
 
 public protocol BindableViewModel: class, Buildable, StatedViewModel {
     associatedtype View: NSObject
-    
+    var view: View? { get }
     func map(from view: View)
     func apply(to view: View)
     func bind(with view: View)
@@ -63,8 +64,8 @@ public protocol BindableViewModel: class, Buildable, StatedViewModel {
     func didApplying(_ view: View)
     func modelWillMapped(from view: View)
     func modelDidMapped(from view: View)
-    func willUnbind()
-    func didUnbind()
+    func willUnbind(with view: View?)
+    func didUnbind(with view: View?)
 }
 
 public protocol Buildable {
@@ -74,4 +75,15 @@ public protocol Buildable {
 public protocol ViewStateBindable {
     var bindingState: BindingState { get set }
     func unbind()
+}
+
+public protocol ObservableView {
+    associatedtype Observer
+    var observer: Observer? { get }
+}
+
+extension ObservableView where Self: NSObject {
+    public var observer: Observer? {
+        bindedModel() as? Observer
+    }
 }

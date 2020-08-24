@@ -42,14 +42,15 @@ extension StatedViewModel {
 }
 
 @objc class AssociatedWrapper: NSObject {
-    var wrapped: Any
+    var wrapped: AnyObject
     
-    init(wrapped: Any) {
+    init(wrapped: AnyObject) {
         self.wrapped = wrapped
     }
 }
 
 open class ViewModel<View: NSObject>: NSObject, BindableViewModel {
+    weak public private(set) var view: View?
     required public override init() {
         super.init()
     }
@@ -92,23 +93,31 @@ open class ViewModel<View: NSObject>: NSObject, BindableViewModel {
     
     open func modelDidMapped(from view: View) { }
     
-    open func willUnbind() { }
+    open func willUnbind(with view: View?) { }
     
-    open func didUnbind() { }
+    open func didUnbind(with view: View?) { }
     
     open func bind(with view: View) {
-        let oldModel: ViewModel<View>? = view.bindedModel()
-        oldModel?.unbind()
+        self.view = view
+        let oldModel = view.bindedModel() as? ViewModel<View>
+        if oldModel != self {
+            oldModel?.unbind()
+        }
         let modelWrapper = AssociatedWrapper(wrapped: self)
         objc_setAssociatedObject(view,  &NSObject.AssociatedKey.model, modelWrapper, .OBJC_ASSOCIATION_RETAIN_NONATOMIC)
     }
     
     final func unbind() {
-        willUnbind()
+        let currentView = self.view
+        willUnbind(with: currentView)
+        if let view = self.view {
+            objc_setAssociatedObject(view,  &NSObject.AssociatedKey.model, nil, .OBJC_ASSOCIATION_RETAIN_NONATOMIC)
+            self.view = nil
+        }
         bindableStates.forEach {
             $0.unbind()
         }
-        didUnbind()
+        didUnbind(with: currentView)
     }
 }
 

@@ -2,5 +2,7 @@ ${PODS_ROOT}/Target Support Files/Pods-TourOfHeroes-TourOfHeroesUITests/Pods-Tou
 ${BUILT_PRODUCTS_DIR}/Alamofire/Alamofire.framework
 ${BUILT_PRODUCTS_DIR}/IQKeyboardManagerSwift/IQKeyboardManagerSwift.framework
 ${BUILT_PRODUCTS_DIR}/NamadaLayout/NamadaLayout.framework
+${BUILT_PRODUCTS_DIR}/Nuke/Nuke.framework
 ${BUILT_PRODUCTS_DIR}/Realm/Realm.framework
 ${BUILT_PRODUCTS_DIR}/RealmSwift/RealmSwift.framework
+${BUILT_PRODUCTS_DIR}/SkeletonView/SkeletonView.framework

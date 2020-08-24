@@ -8,22 +8,27 @@
 import Foundation
 import UIKit
 
-public extension LayoutCompatible where Self: UIView {
-    var viewForLayout: UIView { self }
-    
-    var layoutViewController: UIViewController? { nil }
-}
-
 public extension LayoutCompatible {
     
     var layout: ViewLayout {
-        let context: LayoutContext = .init()
+        let parentLayout = self.parentLayout
+        let context: LayoutContext = parentLayout?.context ?? .init()
         context.currentViewController = layoutViewController
-        return ViewLayout(context: context, view: viewForLayout, parentLayout: viewForLayout.superview?.layout)
+        return ViewLayout(context: context, view: viewForLayout, parentLayout: parentLayout)
+    }
+    
+    private var parentLayout: ViewLayout? {
+        guard let superview = viewForLayout.superview else { return nil }
+        guard !(superview is UITableViewCell || superview is UICollectionViewCell) else {
+            return ViewLayout(context: .init(), view: superview, parentLayout: nil)
+        }
+        return superview.layout
     }
     
     private func prepareLayout(delegate: LayoutBuilderDelegate? = nil, _ builder: (ViewLayout) -> Void) -> ViewLayout {
-        self.viewForLayout.translatesAutoresizingMaskIntoConstraints = false
+        if shouldAutoTranslatesAutoresizingMaskIntoConstraints {
+            self.viewForLayout.translatesAutoresizingMaskIntoConstraints = false
+        }
         let layout = viewForLayout.layout
         if let delegate = delegate {
             layout.context.layoutDelegate = delegate
@@ -34,59 +39,43 @@ public extension LayoutCompatible {
     
     func makeLayout(_ builder: (ViewLayout) -> Void) {
         let layout = prepareLayout(builder)
-        DispatchQueue.main.async {
-            layout.apply()
-        }
+        layout.apply()
     }
     
     func makeAndEditLayout(_ builder: (ViewLayout) -> Void) {
         let layout = prepareLayout(builder)
-        DispatchQueue.main.async {
-            layout.editExistingAndApply()
-        }
+        layout.editExistingAndApply()
     }
     
     func remakeLayout(_ builder: (ViewLayout) -> Void) {
         let layout = prepareLayout(builder)
-        DispatchQueue.main.async {
-            layout.remake()
-        }
+        layout.remake()
     }
     
     func makeLayoutCleanly(_ builder: (ViewLayout) -> Void) {
         let layout = prepareLayout(builder)
         viewForLayout.cleanSubViews()
-        DispatchQueue.main.async {
-            layout.apply()
-        }
+        layout.apply()
     }
     
     func makeLayout(delegate: LayoutBuilderDelegate, _ builder: (ViewLayout) -> Void) {
         let layout = prepareLayout(delegate: delegate, builder)
-        DispatchQueue.main.async {
-            layout.apply()
-        }
+        layout.apply()
     }
     
     func makeAndEditLayout(delegate: LayoutBuilderDelegate,_ builder: (ViewLayout) -> Void) {
         let layout = prepareLayout(delegate: delegate, builder)
-        DispatchQueue.main.async {
-            layout.editExistingAndApply()
-        }
+        layout.editExistingAndApply()
     }
     
     func remakeLayout(delegate: LayoutBuilderDelegate, _ builder: (ViewLayout) -> Void) {
         let layout = prepareLayout(delegate: delegate, builder)
-        DispatchQueue.main.async {
-            layout.remake()
-        }
+        layout.remake()
     }
     
     func makeLayoutCleanly(delegate: LayoutBuilderDelegate, _ builder: (ViewLayout) -> Void) {
         let layout = prepareLayout(delegate: delegate, builder)
         viewForLayout.cleanSubViews()
-        DispatchQueue.main.async {
-            layout.apply()
-        }
+        layout.apply()
     }
 }

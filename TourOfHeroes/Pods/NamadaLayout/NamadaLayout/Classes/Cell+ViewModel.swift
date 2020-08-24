@@ -8,7 +8,7 @@
 import Foundation
 import UIKit
 
-public protocol CellModel {
+public protocol CellModel: Buildable {
     static var cellViewClass: AnyClass { get }
     static var cellReuseIdentifier: String { get }
     func isSameModel(with other: CellModel) -> Bool
@@ -41,7 +41,8 @@ extension UITableViewCell {
         
         public static var cellViewClass: AnyClass { Cell.self }
         public static var cellReuseIdentifier: String {
-            String(describing: Cell.self).filter { $0.isLetter || $0.isNumber }.camelCaseToSnakeCase()
+            let camelCaseName = String(describing: Cell.self).filter { $0.isLetter || $0.isNumber }.camelCaseToSnakeCase()
+            return "namada_managed_cell_\(camelCaseName)"
         }
         
         public var animateInteraction: Bool = false
@@ -74,12 +75,12 @@ extension UITableViewCell {
             super.modelDidMapped(from: view)
         }
         
-        open override func willUnbind() {
-            super.willUnbind()
+        open override func willUnbind(with view: View?) {
+            super.willUnbind(with: view)
         }
         
-        open override func didUnbind() {
-            super.didUnbind()
+        open override func didUnbind(with view: View?) {
+            super.didUnbind(with: view)
         }
         
         public func isSameModel(with other: CellModel) -> Bool {
@@ -96,7 +97,8 @@ extension UICollectionViewCell {
         
         public static var cellViewClass: AnyClass { Cell.self }
         public static var cellReuseIdentifier: String {
-            String(describing: Cell.self).filter { $0.isLetter || $0.isNumber }.camelCaseToSnakeCase()
+            let camelCaseName = String(describing: Cell.self).filter { $0.isLetter || $0.isNumber }.camelCaseToSnakeCase()
+            return "namada_managed_cell_\(camelCaseName)"
         }
         
         public var cellIdentifier: AnyHashable  = String.randomString()
@@ -128,12 +130,12 @@ extension UICollectionViewCell {
             super.modelDidMapped(from: view)
         }
         
-        open override func willUnbind() {
-            super.willUnbind()
+        open override func willUnbind(with view: View?) {
+            super.willUnbind(with: view)
         }
         
-        open override func didUnbind() {
-            super.didUnbind()
+        open override func didUnbind(with view: View?) {
+            super.didUnbind(with: view)
         }
         
         public func isSameModel(with other: CellModel) -> Bool {

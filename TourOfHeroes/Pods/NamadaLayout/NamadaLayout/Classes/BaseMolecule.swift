@@ -56,36 +56,23 @@ public enum CellLayoutBehaviour {
 }
 
 public extension MoleculeCellLayout where Self: LayoutCompatible {
-    func layoutChildIfNeeded() {
-        switch layoutBehaviour {
-        case .custom:
-            customLayout()
-        default:
-            switch layoutPhase {
-            case .reused, .needsLayoutSet:
-                reLayout()
-            case .initial:
-                makeLayout()
-            case .none:
-                return
-            }
-        }
-    }
     
-    func reLayout() {
+    func reLayout() -> Bool {
         switch layoutBehaviour {
         case .once:
-            return
+            return false
         case .editEveryLayout:
             makeAndEditLayout()
         case .remakeEveryLayout:
             remakeLayout()
         case .custom:
-            customLayout()
+            return customLayout()
         }
+        return true
     }
     
-    func customLayout() {
+    @discardableResult
+    func customLayout() -> Bool {
         let layoutStrategy = shouldLayout(on: layoutPhase)
         switch layoutStrategy {
         case .makeAndEditLayout:
@@ -97,8 +84,25 @@ public extension MoleculeCellLayout where Self: LayoutCompatible {
         case .remakeLayout:
             remakeLayout()
         case .none:
-            return
+            return false
         }
+        return true
+    }
+    
+    func makeAndEditLayout() {
+        makeAndEditLayout(layoutChild(_:))
+    }
+    
+    func remakeLayout() {
+        remakeLayout(layoutChild(_:))
+    }
+    
+    func makeLayout() {
+        makeLayout(layoutChild(_:))
+    }
+    
+    func makeLayoutCleanly() {
+        makeLayoutCleanly(layoutChild(_:))
     }
 }
 
@@ -106,14 +110,34 @@ open class CollectionCellLayoutable: UICollectionViewCell, MoleculeCellLayout {
     
     public private(set) var layoutPhase: CellLayouting = .initial
     open var layoutBehaviour: CellLayoutBehaviour { .once }
+    var collectionContentWidth: CGFloat = UIScreen.main.bounds.width
     
     open override func prepareForReuse() {
         super.prepareForReuse()
-        let model: UICollectionViewCell.Model<Self>? = bindedModel()
+        let model = bindedModel() as? UICollectionViewCell.Model<Self>
         model?.unbind()
         layoutPhase = .reused
         layoutChildIfNeeded()
         layoutPhase = .none
+    }
+    
+    open func calculatedCellSize(for collectionContentWidth: CGFloat) -> CGSize { .automatic }
+    
+    open override func preferredLayoutAttributesFitting(_ layoutAttributes: UICollectionViewLayoutAttributes) -> UICollectionViewLayoutAttributes {
+        let layouted = layoutChildIfNeeded()
+        if layouted {
+            setNeedsDisplay()
+        }
+        let calculatedSize = calculatedCellSize(for: collectionContentWidth)
+        let automatedSize = contentView.systemLayoutSizeFitting(layoutAttributes.size)
+        let size: CGSize = .init(
+            width: calculatedSize.width == .automatic ? automatedSize.width : calculatedSize.width,
+            height: calculatedSize.height == .automatic ? automatedSize.height : calculatedSize.height
+        )
+        var newFrame = layoutAttributes.frame
+        newFrame.size = size
+        layoutAttributes.frame = newFrame
+        return layoutAttributes
     }
     
     open override func layoutSubviews() {
@@ -123,14 +147,37 @@ open class CollectionCellLayoutable: UICollectionViewCell, MoleculeCellLayout {
     }
     
     open override func setNeedsLayout() {
-        layoutPhase = .needsLayoutSet
         super.setNeedsLayout()
+        if layoutPhase == .none {
+            layoutPhase = .needsLayoutSet
+        }
     }
     
     open func layoutChild(_ thisLayout: ViewLayout) { }
     
     open func shouldLayout(on phase: CellLayouting) -> LayoutingStrategy {
         fatalError("Layout Behaviour is 'custom' but shouldLayout(on:) is not overriden")
+    }
+    
+    @discardableResult
+    func layoutChildIfNeeded() -> Bool {
+        defer {
+            layoutPhase = .none
+        }
+        switch layoutBehaviour {
+        case .custom:
+            return customLayout()
+        default:
+            switch layoutPhase {
+            case .reused, .needsLayoutSet:
+                return reLayout()
+            case .initial:
+                makeLayout()
+            case .none:
+                return false
+            }
+        }
+        return true
     }
 }
 
@@ -140,7 +187,7 @@ open class TableCellLayoutable: UITableViewCell, MoleculeCellLayout {
     
     open override func prepareForReuse() {
         super.prepareForReuse()
-        let model: UITableViewCell.Model<Self>? = bindedModel()
+        let model = bindedModel() as? UITableViewCell.Model<Self>
         model?.unbind()
         layoutPhase = .reused
         layoutChildIfNeeded()
@@ -154,13 +201,53 @@ open class TableCellLayoutable: UITableViewCell, MoleculeCellLayout {
     }
     
     open override func setNeedsLayout() {
-        layoutPhase = .needsLayoutSet
         super.setNeedsLayout()
+        if layoutPhase == .none {
+            layoutPhase = .needsLayoutSet
+        }
+    }
+    
+    open func calculatedCellHeight(for cellWidth: CGFloat) -> CGFloat { .automatic }
+    
+    open override func systemLayoutSizeFitting(_ targetSize: CGSize, withHorizontalFittingPriority horizontalFittingPriority: UILayoutPriority, verticalFittingPriority: UILayoutPriority) -> CGSize {
+        let layouted = layoutChildIfNeeded()
+        if layouted {
+            setNeedsDisplay()
+        }
+        let size = super.systemLayoutSizeFitting(
+            targetSize,
+            withHorizontalFittingPriority: horizontalFittingPriority,
+            verticalFittingPriority: verticalFittingPriority
+        )
+        let cellHeight = calculatedCellHeight(for: size.width)
+        let height = cellHeight == .automatic ? size.height : cellHeight
+        return CGSize(width: size.width, height: height)
     }
     
     open func layoutChild(_ thisLayout: ViewLayout) { }
     
     open func shouldLayout(on phase: CellLayouting) -> LayoutingStrategy {
         fatalError("Layout Behaviour is 'custom' but shouldLayout(on:) is not overriden")
+    }
+    
+    @discardableResult
+    func layoutChildIfNeeded() -> Bool {
+        defer {
+            layoutPhase = .none
+        }
+        switch layoutBehaviour {
+        case .custom:
+            return customLayout()
+        default:
+            switch layoutPhase {
+            case .reused, .needsLayoutSet:
+                return reLayout()
+            case .initial:
+                makeLayout()
+            case .none:
+                return false
+            }
+        }
+        return true
     }
 }

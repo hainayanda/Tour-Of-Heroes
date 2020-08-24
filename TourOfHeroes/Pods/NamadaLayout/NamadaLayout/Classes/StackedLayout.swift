@@ -251,14 +251,14 @@ extension StackedLayout {
     public func putStackedVerticalStack(restorationId: String? = nil, _ builder: (StackedLayout) -> Void) -> ViewApplicator<UIStackView> {
         let stack = stackedView(with: restorationId, ifNotPresent: UIStackView())
         stack.axis = .vertical
-        return put(stack: stack, stackedStrategy: .append, builder)
+        return putStacked(stack: stack, stackedStrategy: .append, builder)
     }
     
     @discardableResult
     public func putStackedHorizontalStack(restorationId: String? = nil, _ builder: (StackedLayout) -> Void) -> ViewApplicator<UIStackView> {
         let stack = stackedView(with: restorationId, ifNotPresent: UIStackView())
         stack.axis = .horizontal
-        return put(stack: stack, stackedStrategy: .append, builder)
+        return putStacked(stack: stack, stackedStrategy: .append, builder)
     }
     
 }

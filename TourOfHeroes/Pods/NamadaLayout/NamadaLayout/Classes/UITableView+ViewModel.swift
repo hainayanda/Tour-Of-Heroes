@@ -11,7 +11,7 @@ import UIKit
 extension UITableView {
     
     public var model: UITableView.Model {
-        if let model: UITableView.Model = bindedModel() {
+        if let model = bindedModel() as? UITableView.Model {
             return model
         }
         let model = Model()
@@ -28,8 +28,18 @@ extension UITableView {
         }
     }
     
+    public var cells: [TableCellModel] {
+        get {
+            model.sections.first?.cells ?? []
+        }
+        set {
+            let section = Section(identifier: "single_section", cells: newValue)
+            model.sections = [section]
+        }
+    }
+    
     public class Model: ViewModel<UITableView> {
-        @ViewState public var sections: [Section] = []
+        @ObservableState public var sections: [Section] = []
         public var insertRowAnimation: UITableView.RowAnimation = .left
         public var reloadRowAnimation: UITableView.RowAnimation = .fade
         public var deleteRowAnimation: UITableView.RowAnimation = .left
@@ -37,15 +47,29 @@ extension UITableView {
         public var reloadSectionAnimation: UITableView.RowAnimation = .top
         public var deleteSectionAnimation: UITableView.RowAnimation = .top
         public var reloadStrategy: CellReloadStrategy = .reloadLinearDifferences
+        public var unreloadedSections: [Section]?
         
         public override func bind(with view: UITableView) {
             super.bind(with: view)
-            view.dataSource = self
-            $sections.observe(observer: self).didSet { [weak view = view] model, changes  in
-                guard let table = view else { return }
+            $sections.observe(observer: self).didSet { model, changes  in
+                guard let table = model.view else {
+                    model.unreloadedSections = changes.new
+                    model.$sections._wrappedValue = changes.old
+                    return
+                }
+                model.unreloadedSections = nil
                 table.registerNewCell(from: changes.new)
-                model.reload(table, with: changes.new, oldSections: changes.old)
+                DispatchQueue.main.async { [weak model, weak table] in
+                    guard let model = model, let table = table else { return }
+                    model.reload(table, with: changes.new, oldSections: changes.old)
+                }
             }
+        }
+        
+        public override func didApplying(_ view: UITableView) {
+            view.dataSource = self
+            guard let unreloadedSections = unreloadedSections else { return }
+            sections = unreloadedSections
         }
     }
     
@@ -136,16 +160,28 @@ extension UITableView {
 }
 
 extension UITableView.Model {
+    
+    func dataIsValid(_ tableView: UITableView, oldData: [UITableView.Section]) -> Bool {
+        guard tableView.numberOfSections == oldData.count else { return false }
+        for (section, cells) in oldData.enumerated() {
+            guard tableView.numberOfRows(inSection: section) == cells.cellCount else { return false }
+        }
+        return true
+    }
+    
     func reload(_ tableView: UITableView, with sections: [UITableView.Section], oldSections: [UITableView.Section]) {
+        defer {
+            tableView.setNeedsDisplay()
+        }
         let new = sections.compactMap { $0.copy() }
         let old = oldSections.compactMap { $0.copy() }
-        guard !old.isEmpty else {
+        guard !old.isEmpty, dataIsValid(tableView, oldData: oldSections) else {
             tableView.reloadData()
             return
         }
         switch self.reloadStrategy {
         case .reloadAll:
-            tableView.reloadData()
+            reloadAll(tableView, with: new, oldSections: old)
             return
         case .reloadLinearDifferences:
             reloadBatch(for: tableView, with: new, oldSections: old) {
@@ -156,6 +192,32 @@ extension UITableView.Model {
                 arrangeReloadCell(for: tableView, $0, with: $1, sectionIndex: $2)
             }
         }
+    }
+    
+    func reloadAll(_ tableView: UITableView, with sections: [UITableView.Section], oldSections: [UITableView.Section]) {
+        tableView.beginUpdates()
+        let oldCount = max(oldSections.count, 1)
+        let newCount = max(sections.count, 1)
+        let difference = newCount - oldCount
+        let reloaded = min(oldCount, newCount)
+        let inserted = max(difference, 0)
+        let deleted = max(-difference, 0)
+        if reloaded > 1 {
+            tableView.reloadSections(.init(0 ... (reloaded - 1)), with: reloadSectionAnimation)
+        } else {
+            tableView.reloadSections(.init(arrayLiteral: 0), with: reloadSectionAnimation)
+        }
+        if inserted == 1 {
+            tableView.insertSections(.init(arrayLiteral: oldCount), with: insertSectionAnimation)
+        } else if inserted > 1 {
+            tableView.insertSections(.init(oldCount ... (newCount - 1)), with: insertSectionAnimation)
+        }
+        if deleted == 1 {
+            tableView.deleteSections(.init(arrayLiteral: newCount), with: deleteSectionAnimation)
+        } else if deleted > 1 {
+            tableView.deleteSections(.init(newCount ... (oldCount - 1)), with: deleteSectionAnimation)
+        }
+        tableView.endUpdates()
     }
     
     func firstRemovedSectionIndex(
@@ -184,23 +246,30 @@ extension UITableView.Model {
         oldSections: [UITableView.Section],
         _ reloader: (UITableView.Section, UITableView.Section, Int) -> Void) {
         tableView.beginUpdates()
+        defer {
+            tableView.endUpdates()
+        }
         let removedIndex: Int? = firstRemovedSectionIndex(
             for: tableView,
             with: sections,
             oldSections: oldSections,
             whenNotRemoved: reloader
         )
-        if let removed = removedIndex, removed < sections.count {
-            let deleted: IndexSet = sections.endIndex == removed ? .init(arrayLiteral: removed)
-                : .init(integersIn: removed ... sections.endIndex)
-            tableView.deleteSections(deleted, with: deleteSectionAnimation)
-        } else {
-            let countDifference = sections.count - oldSections.count
-            let inserted: IndexSet = countDifference == 1 ? .init(arrayLiteral: oldSections.count)
-                : .init(integersIn: oldSections.count ... sections.endIndex)
-            tableView.insertSections(inserted, with: insertSectionAnimation)
+        if let removed = removedIndex {
+            if removed == oldSections.endIndex {
+                tableView.deleteSections(.init(arrayLiteral: removed), with: deleteSectionAnimation)
+            } else if oldSections.count > removed {
+                tableView.deleteSections(.init(integersIn: removed ... sections.endIndex), with: deleteSectionAnimation)
+            }
+        } else if oldSections.count < sections.count {
+            if sections.count - oldSections.count == 1 {
+                tableView.insertSections(.init(arrayLiteral: oldSections.count), with: insertSectionAnimation)
+            } else {
+                tableView.insertSections(
+                    .init(integersIn: oldSections.count ... sections.endIndex), with: insertSectionAnimation
+                )
+            }
         }
-        tableView.endUpdates()
     }
     
     func firstRemovedCellIndex(

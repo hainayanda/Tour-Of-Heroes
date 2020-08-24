@@ -1,5 +1,5 @@
 //
-//  Insets.swift
+//  Extras.swift
 //  NamadaLayout
 //
 //  Created by Nayanda Haberty (ID) on 04/07/20.
@@ -7,6 +7,8 @@
 
 import Foundation
 import UIKit
+
+//MARK: Insets
 
 public struct UIVerticalInset {
     public static let zero: UIVerticalInset = .init(inset: 0)
@@ -110,4 +112,14 @@ public extension UIEdgeInsets {
             right: horizontal
         )
     }
+}
+
+// MARK: Auto
+
+extension CGFloat {
+    public static var automatic: CGFloat { -(.greatestFiniteMagnitude) }
+}
+
+extension CGSize {
+    public static var automatic: CGSize { .init(width: .automatic, height: .automatic)}
 }

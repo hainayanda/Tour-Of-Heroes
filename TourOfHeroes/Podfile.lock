@@ -1,22 +1,26 @@
 PODS:
   - Alamofire (5.2.2)
   - IQKeyboardManagerSwift (6.5.6)
-  - NamadaLayout (1.1.0-RC)
+  - NamadaLayout (1.1.2-RC)
   - Nimble (8.1.1)
+  - Nuke (9.1.1)
   - Quick (3.0.0)
   - Realm (5.3.5):
     - Realm/Headers (= 5.3.5)
   - Realm/Headers (5.3.5)
   - RealmSwift (5.3.5):
     - Realm (= 5.3.5)
+  - SkeletonView (1.8.7)
 
 DEPENDENCIES:
   - Alamofire (~> 5.2)
   - IQKeyboardManagerSwift (= 6.5.6)
-  - NamadaLayout (= 1.1.0-RC)
+  - NamadaLayout (= 1.1.2-RC)
   - Nimble
+  - Nuke (~> 9.0)
   - Quick
   - RealmSwift
+  - SkeletonView
 
 SPEC REPOS:
   trunk:
@@ -24,19 +28,23 @@ SPEC REPOS:
     - IQKeyboardManagerSwift
     - NamadaLayout
     - Nimble
+    - Nuke
     - Quick
     - Realm
     - RealmSwift
+    - SkeletonView
 
 SPEC CHECKSUMS:
   Alamofire: 814429acc853c6c54ff123fc3d2ef66803823ce0
   IQKeyboardManagerSwift: c7df9d2deb356c04522f5c4b7b6e4ce4d8ed94fe
-  NamadaLayout: 472d46dd40c181f9a26843e5bae4afd0583cca56
+  NamadaLayout: 20009b6408485ee423176ec89156d3ec22a8b6d6
   Nimble: 5f8a2fb6fa343a7242dfdd9d42f7267419d464b2
+  Nuke: af4301b154d3afd8a3b045a5194a9a773a00b7a8
   Quick: 6d9559f40647bc4d510103842ef2fdd882d753e2
   Realm: 2b52fcc86fc0ed3d75a56ac0eb1e73c4f1a60e16
   RealmSwift: a6ea2ea561039fc3833c08dec81371a9a3bb5ca6
+  SkeletonView: ba5370f41280b2f0a76918bb143c1294232bb4f4
 
-PODFILE CHECKSUM: 434368bfb19beb51b9fb830d03df4e8e7a1f4fbb
+PODFILE CHECKSUM: 405aba8b1bd55c920f7396a4ecc72686a7dd0509
 
 COCOAPODS: 1.9.3

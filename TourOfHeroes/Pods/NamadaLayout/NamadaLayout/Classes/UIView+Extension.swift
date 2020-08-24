@@ -13,9 +13,9 @@ extension NSObject {
         static var model: String = "Namada_View_Model"
     }
     
-    public func bindedModel<Model: BindableViewModel>() -> Model? {
+    public func bindedModel() -> AnyObject? {
         let wrapper = objc_getAssociatedObject(self, &AssociatedKey.model) as? AssociatedWrapper
-        return wrapper?.wrapped as? Model
+        return wrapper?.wrapped
     }
 }
 

@@ -9,13 +9,12 @@ import Foundation
 import UIKit
 
 @propertyWrapper
-open class ViewState<Wrapped>: ViewStateBindable {
+open class ViewState<Wrapped>: ObservableState<Wrapped>, ViewStateBindable {
     public var bindingState: BindingState = .none
     private var binder: AnyViewBinder?
     private var observers: [WrappedPropertyObserver<Wrapped>] = []
     var token: NSObjectProtocol?
-    var _wrappedValue: Wrapped
-    public var wrappedValue: Wrapped {
+    public override var wrappedValue: Wrapped {
         get {
             getAndObserve(value: _wrappedValue)
         }
@@ -27,61 +26,22 @@ open class ViewState<Wrapped>: ViewStateBindable {
         }
     }
     
-    func getAndObserve(value: Wrapped) -> Wrapped {
-        observers.forEach { observer in
-            observer.willGetListener?(_wrappedValue)
-        }
-        defer {
-            observers.forEach { observer in
-                observer.didGetListener?(_wrappedValue)
-            }
-        }
-        return _wrappedValue
-    }
+    public override var projectedValue: ViewState<Wrapped> { self }
     
-    func observedSet(value: Wrapped, from: Changes<Wrapped>.Trigger) {
-        observedWillSet(value: value, from: from)
-        setAndObserve(value: value, from: from)
-    }
-    
-    func observedWillSet(value: Wrapped, from: Changes<Wrapped>.Trigger) {
-        let oldValue = _wrappedValue
-        var changes = Changes(new: value, old: oldValue, trigger: from)
-        changes = Changes(new: value, old: oldValue, trigger: from)
-        observers.forEach { observer in
-            observer.willSetListener?(changes)
-        }
-    }
-    
-    func setAndObserve(value: Wrapped, from: Changes<Wrapped>.Trigger) {
-        let oldValue = _wrappedValue
-        _wrappedValue = value
-        var changes = Changes(new: value, old: oldValue, trigger: from)
-        changes = Changes(new: value, old: oldValue, trigger: from)
-        observers.forEach { observer in
-            observer.didSetListener?(changes)
-        }
-    }
-    
-    public var projectedValue: ViewState<Wrapped> { self }
-    
-    public init(wrappedValue: Wrapped) {
-        self._wrappedValue = wrappedValue
+    public override init(wrappedValue: Wrapped) {
+        super.init(wrappedValue: wrappedValue)
     }
     
     deinit {
         reset()
     }
     
-    public func observe<Observer: AnyObject>(observer: Observer) -> PropertyObservers<Observer, Wrapped> {
-        remove(observer: observer)
-        let newObserver = PropertyObservers<Observer, Wrapped>(obsever: observer)
-        self.observers.append(newObserver)
-        return newObserver
+    public override func observe<Observer: AnyObject>(observer: Observer) -> PropertyObservers<Observer, Wrapped> {
+        super.observe(observer: observer)
     }
     
-    public func remove<Observer: AnyObject>(observer: Observer) {
-        self.observers.removeAll { ($0 as? PropertyObservers<Observer, Wrapped>)?.observer === observer }
+    public override func remove<Observer: AnyObject>(observer: Observer) {
+        super.remove(observer: observer)
     }
     
     @discardableResult
@@ -148,8 +108,8 @@ open class ViewState<Wrapped>: ViewStateBindable {
         binder = nil
     }
     
-    public func removeAllObservers() {
-        observers.removeAll()
+    public override func removeAllObservers() {
+        super.removeAllObservers()
     }
     
     @objc public func onTextInput(_ sender: Notification) {

@@ -6,10 +6,12 @@ target 'TourOfHeroes' do
   use_frameworks!
   
   # Pods for TourOfHeroes
-  pod 'NamadaLayout', '1.1.0-RC'
   pod 'RealmSwift'
   pod 'Alamofire', '~> 5.2'
   pod 'IQKeyboardManagerSwift', '6.5.6'
+  pod 'Nuke', '~> 9.0'
+  pod "SkeletonView"
+  pod 'NamadaLayout', '1.1.2-RC' 
 
   target 'TourOfHeroesTests' do
     inherit! :search_paths

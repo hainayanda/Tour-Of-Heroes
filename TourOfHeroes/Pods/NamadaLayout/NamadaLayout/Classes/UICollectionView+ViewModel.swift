@@ -17,7 +17,7 @@ public extension Collection where Indices.Iterator.Element == Index {
 extension UICollectionView {
     
     public var model: UICollectionView.Model {
-        if let model: UICollectionView.Model = bindedModel() {
+        if let model = bindedModel() as? UICollectionView.Model {
             return model
         }
         let model = Model()
@@ -45,20 +45,31 @@ extension UICollectionView {
     }
     
     public class Model: ViewModel<UICollectionView> {
-        @ViewState public var sections: [Section] = []
+        public var unreloadedSections: [Section]?
+        @ObservableState public var sections: [Section] = []
         public var reloadStrategy: CellReloadStrategy = .reloadLinearDifferences
         
         public override func bind(with view: UICollectionView) {
             super.bind(with: view)
-            $sections.observe(observer: self).didSet { [weak view = view] model, changes  in
-                guard let collection = view else { return }
+            $sections.observe(observer: self).didSet { model, changes  in
+                guard let collection = model.view else {
+                    model.unreloadedSections = changes.new
+                    model.$sections._wrappedValue = changes.old
+                    return
+                }
+                model.unreloadedSections = nil
                 collection.registerNewCell(from: changes.new)
-                model.reload(collection, with: changes.new, oldSections: changes.old)
+                DispatchQueue.main.async { [weak model, weak collection] in
+                    guard let model = model, let collection = collection else { return }
+                    model.reload(collection, with: changes.new, oldSections: changes.old)
+                }
             }
         }
         
         public override func didApplying(_ view: UICollectionView) {
             view.dataSource = self
+            guard let unreloadedSections = unreloadedSections else { return }
+            sections = unreloadedSections
         }
     }
     
@@ -122,7 +133,7 @@ extension UICollectionView {
         public static func == (lhs: UICollectionView.TitledSection, rhs: UICollectionView.TitledSection) -> Bool {
             guard let left = lhs.copy() as? UICollectionView.TitledSection,
                 let right = rhs.copy() as? UICollectionView.TitledSection else {
-                return false
+                    return false
             }
             guard left.sectionIdentifier == right.sectionIdentifier,
                 left.title == right.title,
@@ -152,7 +163,7 @@ extension UICollectionView {
         public static func == (lhs: UICollectionView.SupplementedSection, rhs: UICollectionView.SupplementedSection) -> Bool {
             guard let left = lhs.copy() as? UICollectionView.SupplementedSection,
                 let right = rhs.copy() as? UICollectionView.SupplementedSection else {
-                return false
+                    return false
             }
             guard left.sectionIdentifier == right.sectionIdentifier,
                 left.cells.count == right.cells.count else { return false }
@@ -179,6 +190,20 @@ extension UICollectionView {
 extension UICollectionView {
     
     private func registerNewCell(from sections: [UICollectionView.Section]) {
+        self.register(
+            UICollectionViewCell.self,
+            forSupplementaryViewOfKind: UICollectionView.elementKindSectionHeader,
+            withReuseIdentifier: "Namada_Layout_plain_\(UICollectionView.elementKindSectionHeader)"
+        )
+        self.register(
+            UICollectionViewCell.self,
+            forSupplementaryViewOfKind: UICollectionView.elementKindSectionFooter,
+            withReuseIdentifier: "Namada_Layout_plain_\(UICollectionView.elementKindSectionFooter)"
+        )
+        self.register(
+            UICollectionViewCell.self,
+            forCellWithReuseIdentifier: "Namada_Layout_plain_cell"
+        )
         var registeredCells: [String] = []
         var registeredHeaderSupplements: [String] = []
         var registeredFooterSupplements: [String] = []
@@ -212,16 +237,26 @@ extension UICollectionView {
 }
 
 extension UICollectionView.Model {
+    
+    func dataIsValid(_ collectionView: UICollectionView, oldData: [UICollectionView.Section]) -> Bool {
+        guard collectionView.numberOfSections == oldData.count else { return false }
+        for (section, cells) in oldData.enumerated() {
+            guard collectionView.numberOfItems(inSection: section) == cells.cellCount else { return false }
+        }
+        return true
+    }
+    
     func reload(_ collectionView: UICollectionView, with sections: [UICollectionView.Section], oldSections: [UICollectionView.Section]) {
         let new = sections.compactMap { $0.copy() }
         let old = oldSections.compactMap { $0.copy() }
-        guard !old.isEmpty else {
+        guard !old.isEmpty, dataIsValid(collectionView, oldData: oldSections) else {
             collectionView.reloadData()
+            collectionView.collectionViewLayout.invalidateLayout()
             return
         }
         switch self.reloadStrategy {
         case .reloadAll:
-            collectionView.reloadData()
+            reloadAll(collectionView, with: new, oldSections: old)
             return
         case .reloadLinearDifferences:
             reloadBatch(for: collectionView, with: new, oldSections: old) {
@@ -232,6 +267,35 @@ extension UICollectionView.Model {
                 arrangeReloadCell(for: collectionView, $0, with: $1, sectionIndex: $2)
             }
         }
+    }
+    
+    func reloadAll(_ collectionView: UICollectionView, with sections: [UICollectionView.Section], oldSections: [UICollectionView.Section]) {
+        collectionView.performBatchUpdates({
+            let oldCount = max(oldSections.count, 1)
+            let newCount = max(sections.count, 1)
+            let difference = newCount - oldCount
+            let reloaded = min(oldCount, newCount)
+            let inserted = max(difference, 0)
+            let deleted = max(-difference, 0)
+            if reloaded > 1 {
+                collectionView.reloadSections(.init(0 ... (reloaded - 1)))
+            } else {
+                collectionView.reloadSections(.init(arrayLiteral: 0))
+            }
+            if inserted == 1 {
+                collectionView.insertSections(.init(arrayLiteral: oldCount))
+            } else if inserted > 1 {
+                collectionView.insertSections(.init(oldCount ... (newCount - 1)))
+            }
+            if deleted == 1 {
+                collectionView.deleteSections(.init(arrayLiteral: newCount))
+            } else if deleted > 1 {
+                collectionView.deleteSections(.init(newCount ... (oldCount - 1)))
+            }
+        }, completion: { success in
+            guard success else { return }
+            collectionView.collectionViewLayout.invalidateLayout()
+        })
     }
     
     func firstRemovedSectionIndex(
@@ -266,19 +330,24 @@ extension UICollectionView.Model {
                 oldSections: oldSections,
                 whenNotRemoved: reloader
             )
-            if let removed = removedIndex, removed < sections.count {
-                let deleted: IndexSet = sections.endIndex == removed ? .init(arrayLiteral: removed)
-                    : .init(integersIn: removed ... sections.endIndex)
-                collectionView.deleteSections(deleted)
-            } else {
-                let countDifference = sections.count - oldSections.count
-                let inserted: IndexSet = countDifference == 1 ? .init(arrayLiteral: oldSections.count)
-                    : .init(integersIn: oldSections.count ... sections.endIndex)
-                collectionView.insertSections(inserted)
+            if let removed = removedIndex {
+                if removed == oldSections.endIndex {
+                    collectionView.deleteSections(.init(arrayLiteral: removed))
+                } else if oldSections.count > removed {
+                    collectionView.deleteSections(.init(integersIn: removed ... sections.endIndex))
+                }
+            } else if oldSections.count < sections.count {
+                if sections.count - oldSections.count == 1 {
+                    collectionView.insertSections(.init(arrayLiteral: oldSections.count))
+                } else {
+                    collectionView.insertSections(
+                        .init(integersIn: oldSections.count ... sections.endIndex)
+                    )
+                }
             }
         }, completion: { success in
             guard success else { return }
-            collectionView.reloadItems(at: collectionView.indexPathsForVisibleItems)
+            collectionView.collectionViewLayout.invalidateLayout()
         })
     }
     
@@ -368,7 +437,7 @@ extension UICollectionView.Model {
         for (index, newCell) in newCells.enumerated() {
             guard let oldCell = oldCellsArranged[safe: index],
                 newCell.isNotSameModel(with: oldCell) else {
-                continue
+                    continue
             }
             if let oldIndex = oldCellsArranged.firstIndex(where: { $0.isSameModel(with: newCell) }) {
                 collectionView.moveItem(
@@ -409,8 +478,21 @@ extension UICollectionView.Model: UICollectionViewDataSource {
     public func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         guard let section = self.sections[safe: indexPath.section],
             let cellModel = section.cells[safe: indexPath.item]
-            else { return .init() }
+            else {
+                return collectionView.dequeueReusableCell(withReuseIdentifier: "Namada_Layout_plain_cell", for: indexPath)
+        }
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: cellModel.reuseIdentifier, for: indexPath)
+        if let cellLayoutable = cell as? CollectionCellLayoutable {
+            let contentWidth: CGFloat = min(
+                collectionView.contentSize.width,
+                collectionView.collectionViewLayout.collectionViewContentSize.width
+            )
+            let contentInset: UIHorizontalInset = collectionView.contentInset.asHorizontalInset
+            let sectionInset: UIHorizontalInset = (collectionView.collectionViewLayout as? UICollectionViewFlowLayout)?
+                .sectionInset.asHorizontalInset ?? .zero
+            cellLayoutable.collectionContentWidth = contentWidth - contentInset.left -
+                contentInset.right - sectionInset.left - sectionInset.left
+        }
         cellModel.apply(cell: cell)
         return cell
     }
@@ -452,6 +534,10 @@ extension UICollectionView.Model: UICollectionViewDataSource {
             footer.apply(cell: footerCell as! UICollectionViewCell)
             return footerCell
         }
-        return .init()
+        return collectionView.dequeueReusableSupplementaryView(
+            ofKind: kind,
+            withReuseIdentifier: "Namada_Layout_plain_\(kind)",
+            for: indexPath
+        )
     }
 }

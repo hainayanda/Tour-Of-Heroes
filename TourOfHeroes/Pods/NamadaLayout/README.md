@@ -19,7 +19,7 @@ NamadaLayout is available through [CocoaPods](https://cocoapods.org). To install
 it, simply add the following line to your Podfile:
 
 ```ruby
-pod 'NamadaLayout'
+pod 'NamadaLayout', '1.1.2-RC'
 ```
 
 ## Author
@@ -522,6 +522,37 @@ and you can return the following LayoutStrategy:
 - `makeLayout` which will layouting using makeLayout
 - `makeLayoutCleanly` which will layouting using makeLayoutCleanly
 - `none` which will not do any layout
+
+If your `UITableView` or `UICollectionView` have custom calculated size, you can just override `calculatedCellSize(for collectionContentWidth: CGFloat) -> CGSize` for UICollectionViewCell and `calculatedCellHeight(for cellWidth: CGFloat) -> CGFloat` for UITableViewCell.
+
+```swift
+class MyCollectionCell: CollectionCellLayoutable {
+    ...
+    ...
+    //default return value is CGSize.automatic
+    override func calculatedCellSize(for collectionContentWidth: CGFloat) -> CGSize {
+        let side: CGFloat = collectionContentWidth / 3
+        return .init(width: side, height: side)
+    }
+    ...
+    ...
+}
+```
+
+or for UITableViewCell
+
+```swift
+class MyTableCell: TableCellLayoutable {
+    ...
+    ...
+    //default return value is CGFloat.automatic
+    override func calculatedCellHeight(for cellWidth: CGFloat) -> CGFloat {
+        cellWidth / 3
+    }
+    ...
+    ...
+}
+```
 
 ## Binding
 

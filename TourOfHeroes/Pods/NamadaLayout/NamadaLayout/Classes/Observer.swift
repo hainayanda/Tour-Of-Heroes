@@ -74,6 +74,7 @@ public struct Changes<Change> {
         case view(UIView)
         case state
         case bind
+        case invoked
         
         public var triggeringView: UIView? {
             switch self {
@@ -124,6 +125,7 @@ public class WrappedPropertyObserver<Wrapped> {
     
     var dispatcher: DispatchQueue = .main
     
+    @Atomic var throttle: TimeInterval = 0
     @Atomic var delay: TimeInterval = 0
     @Atomic var latestChangesTriggered: Date = .distantPast
     @Atomic var latestChanges: Changes<Wrapped>?
@@ -143,7 +145,7 @@ public class WrappedPropertyObserver<Wrapped> {
             }
             return
         }
-        dispatcher.async { [weak self] in
+        dispatcher.asyncAfter(deadline: .now() + throttle) { [weak self] in
             guard let self = self, let changes = self.latestChanges else { return }
             self.latestChanges = nil
             self.didSetListener?(changes)
@@ -164,6 +166,12 @@ public class PropertyObservers<Observer: AnyObject, Wrapped>: WrappedPropertyObs
     @discardableResult
     public func delayMultipleSetTrigger(by delay: TimeInterval) -> Self {
         self.delay = delay
+        return self
+    }
+    
+    @discardableResult
+    public func throttle(by delay: TimeInterval) -> Self {
+        self.throttle = delay
         return self
     }
     
