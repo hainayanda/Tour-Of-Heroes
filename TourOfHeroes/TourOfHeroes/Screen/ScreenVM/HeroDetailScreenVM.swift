@@ -24,10 +24,8 @@ class HeroDetailScreenVM: ViewModel<HeroDetailScreen> {
         $hero.observe(observer: self)
             .throttle(by: .instant)
             .didSet { model, changes in
-                dispatchOnMainThread(after: .now() + .instant) {
-                    model.backDrop = changes.new?.imageURL
-                    model.view?.tableView.sections = model.constructCells(from: changes.new)
-                }
+                model.backDrop = changes.new?.imageURL
+                model.view?.tableView.sections = model.constructCells(from: changes.new, andSimilar: model.similarHeroes)
         }
         $backDrop.observe(observer: self).didSet { model, changes in
             view.translucentBackDrop.imageConvertible = changes.new
@@ -38,7 +36,7 @@ class HeroDetailScreenVM: ViewModel<HeroDetailScreen> {
         $hero.invokeWithCurrentValue()
     }
     
-    func constructCells(from hero: Hero?) -> [UITableView.Section] {
+    func constructCells(from hero: Hero?, andSimilar similarHeroes: [Hero]) -> [UITableView.Section] {
         guard let hero = hero else {
             view?.showToast(message: "No Hero Data")
             return []

@@ -24,7 +24,7 @@ class HeroMainScreenVM: ViewModel<HeroMainScreen> {
         heroes[safe: selectedAttrIndex]?.heroes ?? []
     }
     
-    lazy var heroRepository: HeroRepository = .init()
+    lazy var heroRepository: HeroRepositoryManager = HeroRepository()
     lazy var heroRouter: HeroRouter = ConcreteHeroRouter.shared
     
     override func didApplying(_ view: HeroMainScreen) {
@@ -106,6 +106,7 @@ class HeroMainScreenVM: ViewModel<HeroMainScreen> {
                 return builder.build()
         }
         let header: NavigatableTitledHeader.Model = build {
+            $0.cellIdentifier = "attribute_header"
             $0.title = selectedHeroes.primaryAttribute
             $0.desc = selectedHeroes.attributeDescription
             $0.shouldNavigate = { [weak self] _ in
@@ -142,7 +143,17 @@ class HeroMainScreenVM: ViewModel<HeroMainScreen> {
             collection.heroes.append(hero)
         }
         if let collection = currentCollection {
-            collection.heroes = collection.heroes.sorted { $0.proPick > $1.proPick }
+            collection.heroes = collection.heroes.sorted {
+                if collection.primaryAttribute == "Agility" {
+                    return $0.moveSpeed > $1.moveSpeed
+                } else if collection.primaryAttribute == "Strength" {
+                    return $0.baseStr > $1.baseStr
+                } else if collection.primaryAttribute == "Inteligence" {
+                    return $0.baseInt > $1.baseInt
+                } else {
+                    return $0.proPick > $1.proPick
+                }
+            }
         }
         return collections
     }
@@ -152,6 +163,7 @@ class HeroMainScreenVM: ViewModel<HeroMainScreen> {
             attribute: hero.primaryAttributes,
             description: hero.primaryAttributesDescription
         )
+        collection.heroes.append(hero)
         collections.append(collection)
         return collection
     }
@@ -200,7 +212,7 @@ extension HeroMainScreenVM: HeroMainScreenObserver {
     }
 }
 
-class HeroCollection {
+class HeroCollection: Equatable {
     var primaryAttribute: String
     var attributeDescription: String
     var heroes: [Hero] = []
@@ -208,5 +220,11 @@ class HeroCollection {
     init(attribute: String, description: String) {
         self.primaryAttribute = attribute
         self.attributeDescription = description
+    }
+    
+    static func == (lhs: HeroCollection, rhs: HeroCollection) -> Bool {
+        lhs.primaryAttribute == rhs.primaryAttribute
+            && lhs.attributeDescription == rhs.attributeDescription
+            && lhs.heroes == rhs.heroes
     }
 }

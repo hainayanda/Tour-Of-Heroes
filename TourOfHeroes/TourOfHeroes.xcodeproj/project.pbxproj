@@ -23,6 +23,11 @@
 		73B61E7D24F37619008C601B /* HeroStatusCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 73B61E7C24F37619008C601B /* HeroStatusCell.swift */; };
 		73B61E8024F37800008C601B /* LabelWithDetail.swift in Sources */ = {isa = PBXBuildFile; fileRef = 73B61E7F24F37800008C601B /* LabelWithDetail.swift */; };
 		73B61E8224F3930F008C601B /* UIView+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 73B61E8124F3930F008C601B /* UIView+Extensions.swift */; };
+		73CD141B24F4C62800D038E9 /* HeroRepositoryMock.swift in Sources */ = {isa = PBXBuildFile; fileRef = 73CD141A24F4C62800D038E9 /* HeroRepositoryMock.swift */; };
+		73CD141D24F4CB1400D038E9 /* HeroMainScreenVMSpec.swift in Sources */ = {isa = PBXBuildFile; fileRef = 73CD141C24F4CB1400D038E9 /* HeroMainScreenVMSpec.swift */; };
+		73CD141F24F4D27700D038E9 /* HeroRouter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 73CD141E24F4D27700D038E9 /* HeroRouter.swift */; };
+		73CD142124F4D54300D038E9 /* HeroMockGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 73CD142024F4D54300D038E9 /* HeroMockGenerator.swift */; };
+		73CD142524F4F7E200D038E9 /* HeroDetailScreenVMSpec.swift in Sources */ = {isa = PBXBuildFile; fileRef = 73CD142424F4F7E200D038E9 /* HeroDetailScreenVMSpec.swift */; };
 		73CE794F24F0D0F70022427E /* Promise.swift in Sources */ = {isa = PBXBuildFile; fileRef = 73CE794E24F0D0F70022427E /* Promise.swift */; };
 		73CE795224F0D1ED0022427E /* RepositoryPromise.swift in Sources */ = {isa = PBXBuildFile; fileRef = 73CE795124F0D1ED0022427E /* RepositoryPromise.swift */; };
 		73CE795424F0FC7A0022427E /* APIAggregator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 73CE795324F0FC7A0022427E /* APIAggregator.swift */; };
@@ -101,6 +106,11 @@
 		73B61E7C24F37619008C601B /* HeroStatusCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HeroStatusCell.swift; sourceTree = "<group>"; };
 		73B61E7F24F37800008C601B /* LabelWithDetail.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LabelWithDetail.swift; sourceTree = "<group>"; };
 		73B61E8124F3930F008C601B /* UIView+Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIView+Extensions.swift"; sourceTree = "<group>"; };
+		73CD141A24F4C62800D038E9 /* HeroRepositoryMock.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HeroRepositoryMock.swift; sourceTree = "<group>"; };
+		73CD141C24F4CB1400D038E9 /* HeroMainScreenVMSpec.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HeroMainScreenVMSpec.swift; sourceTree = "<group>"; };
+		73CD141E24F4D27700D038E9 /* HeroRouter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HeroRouter.swift; sourceTree = "<group>"; };
+		73CD142024F4D54300D038E9 /* HeroMockGenerator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HeroMockGenerator.swift; sourceTree = "<group>"; };
+		73CD142424F4F7E200D038E9 /* HeroDetailScreenVMSpec.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HeroDetailScreenVMSpec.swift; sourceTree = "<group>"; };
 		73CE794E24F0D0F70022427E /* Promise.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Promise.swift; sourceTree = "<group>"; };
 		73CE795124F0D1ED0022427E /* RepositoryPromise.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RepositoryPromise.swift; sourceTree = "<group>"; };
 		73CE795324F0FC7A0022427E /* APIAggregator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = APIAggregator.swift; sourceTree = "<group>"; };
@@ -222,6 +232,8 @@
 		73AA020924EFDE19003A9DD2 /* TourOfHeroesTests */ = {
 			isa = PBXGroup;
 			children = (
+				73CD141924F4C61200D038E9 /* Mock */,
+				73CD141724F4C5F900D038E9 /* Screen */,
 				73AA020A24EFDE19003A9DD2 /* TourOfHeroesTests.swift */,
 				73AA020C24EFDE19003A9DD2 /* Info.plist */,
 			);
@@ -244,6 +256,33 @@
 				73E0FF9B24F3DC1800BA9A64 /* PhotoWithDetailCell.swift */,
 			);
 			path = View;
+			sourceTree = "<group>";
+		};
+		73CD141724F4C5F900D038E9 /* Screen */ = {
+			isa = PBXGroup;
+			children = (
+				73CD141824F4C60100D038E9 /* ScreenVM */,
+			);
+			path = Screen;
+			sourceTree = "<group>";
+		};
+		73CD141824F4C60100D038E9 /* ScreenVM */ = {
+			isa = PBXGroup;
+			children = (
+				73CD141C24F4CB1400D038E9 /* HeroMainScreenVMSpec.swift */,
+				73CD142424F4F7E200D038E9 /* HeroDetailScreenVMSpec.swift */,
+			);
+			path = ScreenVM;
+			sourceTree = "<group>";
+		};
+		73CD141924F4C61200D038E9 /* Mock */ = {
+			isa = PBXGroup;
+			children = (
+				73CD141A24F4C62800D038E9 /* HeroRepositoryMock.swift */,
+				73CD141E24F4D27700D038E9 /* HeroRouter.swift */,
+				73CD142024F4D54300D038E9 /* HeroMockGenerator.swift */,
+			);
+			path = Mock;
 			sourceTree = "<group>";
 		};
 		73CE795024F0D1DF0022427E /* Base */ = {
@@ -719,7 +758,12 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				73CD142524F4F7E200D038E9 /* HeroDetailScreenVMSpec.swift in Sources */,
+				73CD142124F4D54300D038E9 /* HeroMockGenerator.swift in Sources */,
+				73CD141D24F4CB1400D038E9 /* HeroMainScreenVMSpec.swift in Sources */,
 				73AA020B24EFDE19003A9DD2 /* TourOfHeroesTests.swift in Sources */,
+				73CD141F24F4D27700D038E9 /* HeroRouter.swift in Sources */,
+				73CD141B24F4C62800D038E9 /* HeroRepositoryMock.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -10,16 +10,16 @@ import Foundation
 import RealmSwift
 import Alamofire
 
-protocol HeroRepositoryManager {
+public protocol HeroRepositoryManager {
     func getHero(withId identifier: Int) -> RepositoryPromise<Hero>
     func getAllHero() -> RepositoryPromise<[Hero]>
 }
 
 public class HeroRepository: HeroRepositoryManager {
-    func getHero(withId identifier: Int) -> RepositoryPromise<Hero> {
+    public func getHero(withId identifier: Int) -> RepositoryPromise<Hero> {
         return IdentifiedHeroRequest(identifier: identifier, ignoreAPIWhenPresent: true)
     }
-    func getAllHero() -> RepositoryPromise<[Hero]> {
+    public func getAllHero() -> RepositoryPromise<[Hero]> {
         return AllHeroesRequest()
     }
 }

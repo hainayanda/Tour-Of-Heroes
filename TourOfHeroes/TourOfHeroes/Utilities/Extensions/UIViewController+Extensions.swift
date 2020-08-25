@@ -273,17 +273,20 @@ public extension UIViewController {
     private func layoutToast(_ toastContainer: UIView, _ message: String) {
         makeLayout { layout in
             layout.put(toastContainer) { containerLayout in
-                containerLayout.fixToParent(.horizontal, with: .init(inset: .x64))
-                containerLayout.center.yAxis.equalWithParent()
+                containerLayout.fixToParent(.horizontal, with: .init(inset: .x64), priority: .defaultHigh)
+                containerLayout.center.yAxis.equalWithParent(priority: .defaultHigh)
+                containerLayout.width.lesThan(layout.width, multipliedBy: 1, offsetBy: -.x128, priority: .defaultHigh)
                 containerLayout.height.moreThan(.x64)
                 
                 containerLayout.putLabel { labelLayout in
-                    labelLayout.fillParent(with: .init(inset: .x16))
+                    labelLayout.fillParent(with: .init(inset: .x8), priority: .defaultHigh)
                 }
                 .apply {
                     $0.font = .systemFont(ofSize: .x12)
                     $0.textColor = .white
                     $0.textAlignment = .center
+                    $0.lineBreakMode = .byTruncatingTail
+                    $0.numberOfLines = 0
                     $0.text = message
                 }
             }
