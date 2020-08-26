@@ -56,8 +56,11 @@ extension HeroWithStatsCache {
                 return
             }
             let result = Array(realm.objects(Hero.self))
+            let copiedResult: [Hero] = result.compactMap {
+                $0.copy() as? Hero
+            }
             dispatchOnMainThread {
-                run(result)
+                run(copiedResult)
             }
         }
         defer {

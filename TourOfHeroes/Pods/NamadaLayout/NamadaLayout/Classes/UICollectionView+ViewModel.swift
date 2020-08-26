@@ -435,9 +435,13 @@ extension UICollectionView.Model {
             sectionIndex: sectionIndex
         )
         for (index, newCell) in newCells.enumerated() {
-            guard let oldCell = oldCellsArranged[safe: index],
-                newCell.isNotSameModel(with: oldCell) else {
-                    continue
+            guard let oldCell = oldCellsArranged[safe: index] else {
+                collectionView.insertItems(at: [.init(row: index, section: sectionIndex)])
+                oldCellsArranged.insert(newCell, at: index)
+                continue
+            }
+            guard newCell.isNotSameModel(with: oldCell) else {
+                continue
             }
             if let oldIndex = oldCellsArranged.firstIndex(where: { $0.isSameModel(with: newCell) }) {
                 collectionView.moveItem(

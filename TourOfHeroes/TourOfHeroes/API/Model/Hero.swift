@@ -180,8 +180,10 @@ public class Hero: Object, Codable, ParseableFromJSON {
         nullWin = values.safeDecode(.nullWin)
     }
     
-    func decode(_ container: KeyedDecodingContainer<CodingKeys>, key: CodingKeys) -> String {
-        (try? container.decodeIfPresent(String.self, forKey: .localizedName)) ?? ""
+    public override func copy() -> Any {
+        guard let selfJson = try? JSONEncoder().encode(self),
+            let copied = try? JSONDecoder().decode(Hero.self, from: selfJson) else { return Hero() }
+        return copied
     }
     
 }
@@ -205,14 +207,17 @@ extension Hero {
         """
     ]
     public var primaryAttributes: String {
-        Hero.mappedAttributes[primaryAttr] ?? primaryAttr
+        guard !self.isInvalidated else { return "" }
+        return Hero.mappedAttributes[primaryAttr] ?? primaryAttr
     }
     
     public var primaryAttributesDescription: String {
-        Hero.mappedAttributesDescription[primaryAttr] ?? "Unknown Attribute"
+        guard !self.isInvalidated else { return "" }
+        return Hero.mappedAttributesDescription[primaryAttr] ?? "Unknown Attribute"
     }
     
     public var imageURL: String {
-        "https://steamcdn-a.akamaihd.net/\(img)"
+        guard !self.isInvalidated else { return "" }
+        return "https://steamcdn-a.akamaihd.net/\(img)"
     }
 }

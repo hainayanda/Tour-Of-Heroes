@@ -33,7 +33,7 @@ class HeroAttributeCellVM: UICollectionViewCell.Model<LargeImageWithLabelCell> {
         $primaryAttr.bind(with: view.label, \.text)
         $selected.observe(observer: self)
             .didSet { model, changes in
-                guard let cell = model.view, changes.new != changes.old else { return }
+                guard let cell = model.view else { return }
                 cell.label.font = .systemFont(ofSize: .x16, weight: changes.new ? .semibold : .medium)
                 cell.label.textColor = changes.new ? .black : .darkGray
                 cell.layoutMargins = changes.new ?

@@ -13,7 +13,7 @@ import NamadaLayout
 class HeroMainScreenVM: ViewModel<HeroMainScreen> {
     
     @ObservableState var heroes: [HeroCollection] = []
-    @ObservableState var loading: Bool = false
+    @ObservableState var loading: Bool = true
     @ObservableState var error: Error?
     @ObservableState var selectedAttrIndex: Int = 0
     
@@ -39,6 +39,7 @@ class HeroMainScreenVM: ViewModel<HeroMainScreen> {
                 model.reloadCell()
         }
         $loading.observe(observer: self)
+            .delayMultipleSetTrigger(by: 0.5)
             .didSet { model, changes in
                 guard let collection = model.view?.collection else { return }
                 guard changes.new else {
@@ -66,12 +67,11 @@ class HeroMainScreenVM: ViewModel<HeroMainScreen> {
     }
     
     func reloadHeroes() {
-        loading = true
         heroRepository.getAllHero().then(
             run: { [weak self] heroes in
                 guard let self = self else { return }
-                self.heroes = self.group(heroes: heroes)
                 self.loading = false
+                self.heroes = self.group(heroes: heroes)
                 self.view?.refreshControl.endRefreshing()
             }, whenFailed: { [weak self] error in
                 guard let self = self else { return }
@@ -83,16 +83,13 @@ class HeroMainScreenVM: ViewModel<HeroMainScreen> {
     
     func reloadCell() {
         guard let screen = self.view else { return }
-        screen.collection.sections = constructCell(
-            from: self.heroes,
-            selectedAttribute: self.selectedAttribute
-        )
+        screen.collection.sections = constructCell(from:  self.heroes, selectedAttribute: self.selectedAttribute)
     }
     
     func constructCell(from heroes: [HeroCollection], selectedAttribute: String?) -> [UICollectionView.Section] {
         let builder = CollectionCellBuilder(section: .init(identifier: "hero_attribute"))
             .next(type: HeroAttributeCellVM.self, from: heroes) { cellVM, hero in
-                cellVM.cellIdentifier = hero.heroes.first?.primaryAttr
+                cellVM.cellIdentifier = "\(hero.heroes.first?.primaryAttr ?? .randomString())_\(hero.primaryAttribute == selectedAttribute)"
                 cellVM.imageConvertible = hero.heroes.first?.imageURL
                 cellVM.primaryAttr = hero.primaryAttribute
                 guard let selected = selectedAttribute else {
