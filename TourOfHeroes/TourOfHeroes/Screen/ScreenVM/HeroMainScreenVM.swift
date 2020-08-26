@@ -48,6 +48,9 @@ class HeroMainScreenVM: ViewModel<HeroMainScreen> {
                     collection.isSkeletonable = false
                     return
                 }
+                guard collection.cells.isEmpty else {
+                    return
+                }
                 collection.isScrollEnabled = false
                 collection.alwaysBounceVertical = false
                 collection.isSkeletonable = true
@@ -67,6 +70,7 @@ class HeroMainScreenVM: ViewModel<HeroMainScreen> {
     }
     
     func reloadHeroes() {
+        self.loading = true
         heroRepository.getAllHero().then(
             run: { [weak self] heroes in
                 guard let self = self else { return }
