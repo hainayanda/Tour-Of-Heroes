@@ -39,6 +39,31 @@ extension StatedViewModel {
         } while currentReflection != nil
         return states
     }
+    
+    private func extractObservables(from mirror: Mirror, into states: inout [StateObservable]) {
+        for child in mirror.children {
+            if let stateObservable = child.value as? StateObservable {
+                states.append(stateObservable)
+            } else if let model = child.value as? StatedViewModel {
+                states.append(contentsOf: model.observables)
+            }
+        }
+    }
+    
+    public var observables: [StateObservable] {
+        let reflection = Mirror(reflecting: self)
+        var states: [StateObservable] = []
+        var currentReflection: Mirror? = reflection
+        repeat {
+            guard let current: Mirror = currentReflection else {
+                break
+            }
+            extractObservables(from: current, into: &states)
+            currentReflection = current.superclassMirror
+        } while currentReflection != nil
+        return states
+    }
+
 }
 
 @objc class AssociatedWrapper: NSObject {
@@ -63,6 +88,9 @@ open class ViewModel<View: NSObject>: NSObject, BindableViewModel {
             state.bindingState = .applying
         }
         bind(with: view)
+        observables.forEach {
+            $0.invokeWithCurrentValue()
+        }
         states.forEach {
             var state = $0
             state.bindingState = .none
@@ -113,6 +141,9 @@ open class ViewModel<View: NSObject>: NSObject, BindableViewModel {
         if let view = self.view {
             objc_setAssociatedObject(view,  &NSObject.AssociatedKey.model, nil, .OBJC_ASSOCIATION_RETAIN_NONATOMIC)
             self.view = nil
+        }
+        observables.forEach {
+            $0.removeAllObservers()
         }
         bindableStates.forEach {
             $0.unbind()

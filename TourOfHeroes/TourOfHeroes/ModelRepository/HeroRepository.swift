@@ -61,7 +61,7 @@ extension HeroWithStatsCache {
             }
         }
         defer {
-            DispatchQueue.global().async(execute: worker)
+            DispatchQueue.main.async(execute: worker)
         }
         return worker
     }

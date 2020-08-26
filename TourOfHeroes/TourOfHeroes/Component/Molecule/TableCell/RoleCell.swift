@@ -69,9 +69,5 @@ class RoleCell: TableCellLayoutable {
             }
             $label.bind(with: view.descLabel, \.text)
         }
-        
-        override func didApplying(_ view: UITableViewCell.Model<RoleCell>.View) {
-            $roles.invokeWithCurrentValue()
-        }
     }
 }

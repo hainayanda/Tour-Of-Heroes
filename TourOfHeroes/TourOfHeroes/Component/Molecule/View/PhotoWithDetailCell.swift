@@ -30,13 +30,14 @@ class PhotoWithDetailCell: UIView, MoleculeLayout {
         $0.textAlignment = .center
     }
     
-    var photoSize: CGSize = .init(width: .x72, height: .x96)
+    var photoSize: CGSize = .init(width: .x72, height: .x72)
     
     func layoutChild(_ thisLayout: ViewLayout) {
         let labelHeight: CGFloat = label.font.lineHeight
         thisLayout.put(photoImage) { imgLayout in
-            imgLayout.fixToParent(.fullTop, with: layoutMargins)
-            imgLayout.size(equalWith: photoSize, priority: .defaultHigh)
+            imgLayout.size(equalWith: photoSize, priority: .required)
+            imgLayout.inParent(.fullTop, moreThan: layoutMargins)
+            imgLayout.center.xAxis.equalWithParent()
         }
         thisLayout.put(label) { labelLayout in
             labelLayout.atBottom(of: photoImage, spacing: .x12)

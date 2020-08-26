@@ -17,9 +17,9 @@ public class LayoutContext {
             _layoutDelegate = newValue
         }
     }
-    var currentPriority: UILayoutPriority = .defaultLow
+    var currentPriority: UILayoutPriority = .init(999)
     var countedPriority: UILayoutPriority {
-        let newPriority: UILayoutPriority = .init(rawValue: currentPriority.rawValue + 1)
+        let newPriority: UILayoutPriority = .init(rawValue: currentPriority.rawValue - 1)
         currentPriority = newPriority
         return newPriority
     }

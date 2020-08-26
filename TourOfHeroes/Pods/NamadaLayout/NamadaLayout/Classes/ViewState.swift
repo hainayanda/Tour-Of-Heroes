@@ -60,23 +60,31 @@ open class ViewState<Wrapped>: ObservableState<Wrapped>, ViewStateBindable {
     public func apply<View: UIView>(
         into view: View,
         _ keyPath: ReferenceWritableKeyPath<View, Wrapped>) -> CompleteBinder<View, Wrapped> {
-        bind(with: view, keyPath, state: .applying)
+        let stateBefore = bindingState
+        bindingState = .applying
+        defer {
+            bindingState = stateBefore
+        }
+        return bind(with: view, keyPath)
     }
     
     @discardableResult
     public func map<View: UIView>(
         from view: View,
         _ keyPath: ReferenceWritableKeyPath<View, Wrapped>) -> CompleteBinder<View, Wrapped> {
-        bind(with: view, keyPath, state: .mapping)
+        let stateBefore = bindingState
+        bindingState = .mapping
+        defer {
+            bindingState = stateBefore
+        }
+        return bind(with: view, keyPath)
     }
     
     @discardableResult
     public func bind<View: UIView>(
         with view: View,
-        _ keyPath: ReferenceWritableKeyPath<View, Wrapped>,
-        state: BindingState? = nil) -> CompleteBinder<View, Wrapped> {
+        _ keyPath: ReferenceWritableKeyPath<View, Wrapped>) -> CompleteBinder<View, Wrapped> {
         unbind()
-        let bindingState = state ?? self.bindingState
         switch bindingState {
         case .mapping:
             observedSet(value: view[keyPath: keyPath], from: .bind)
@@ -221,9 +229,8 @@ public class WeakViewState<Wrapped: AnyObject>: ViewState<Wrapped?> {
     @discardableResult
     public override func bind<View: UIView>(
         with view: View,
-        _ keyPath: ReferenceWritableKeyPath<View, Wrapped?>,
-        state: BindingState? = nil) -> CompleteBinder<View, Wrapped?> {
-        super.bind(with: view, keyPath, state: state)
+        _ keyPath: ReferenceWritableKeyPath<View, Wrapped?>) -> CompleteBinder<View, Wrapped?> {
+        super.bind(with: view, keyPath)
     }
     
     public override func reset() {

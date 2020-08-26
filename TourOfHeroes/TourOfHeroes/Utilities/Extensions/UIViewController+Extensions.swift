@@ -275,7 +275,7 @@ public extension UIViewController {
             layout.put(toastContainer) { containerLayout in
                 containerLayout.fixToParent(.horizontal, with: .init(inset: .x64), priority: .defaultHigh)
                 containerLayout.center.yAxis.equalWithParent(priority: .defaultHigh)
-                containerLayout.width.lesThan(layout.width, multipliedBy: 1, offsetBy: -.x128, priority: .defaultHigh)
+                containerLayout.width.lessThan(layout.width, multipliedBy: 1, offsetBy: -.x128, priority: .defaultHigh)
                 containerLayout.height.moreThan(.x64)
                 
                 containerLayout.putLabel { labelLayout in

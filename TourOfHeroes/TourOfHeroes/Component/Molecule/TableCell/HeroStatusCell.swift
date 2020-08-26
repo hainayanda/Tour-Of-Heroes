@@ -93,10 +93,6 @@ class HeroStatusCell: TableCellLayoutable {
         }
     }
     
-    override func calculatedCellHeight(for cellWidth: CGFloat) -> CGFloat {
-        return margins.top + label.font.lineHeight + spacer + underlineHeight + hiSpacer + stackHeight + margins.bottom
-    }
-    
     class Model: UITableViewCell.Model<HeroStatusCell> {
         @ObservableState var hero: Hero?
         @ViewState var heroHealth: String?
@@ -122,10 +118,6 @@ class HeroStatusCell: TableCellLayoutable {
             $heroSpeed.bind(with: view.speedLabel.detail, \.text)
             $heroArmour.bind(with: view.armourLabel.detail, \.text)
             $heroRange.bind(with: view.rangeLabel.detail, \.text)
-        }
-        
-        override func didApplying(_ view: UITableViewCell.Model<HeroStatusCell>.View) {
-            $hero.invokeWithCurrentValue()
         }
     }
 }

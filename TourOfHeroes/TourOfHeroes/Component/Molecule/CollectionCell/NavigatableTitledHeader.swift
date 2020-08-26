@@ -39,7 +39,7 @@ class NavigatableTitledHeader: CollectionCellLayoutable {
         }
         thisLayout.put(titleLabel) { labelLayout in
             labelLayout.fixToParent(.topLeft, with: margin)
-            labelLayout.height.equal(with: titleLabel.font.lineHeight, priority: .defaultHigh)
+            labelLayout.height.equal(with: titleLabel.font.lineHeight)
         }
         thisLayout.put(descLabel) { descLayout in
             descLayout.left.distanceToParent(at: margin.left)

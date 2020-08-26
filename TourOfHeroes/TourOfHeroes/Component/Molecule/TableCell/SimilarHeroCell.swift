@@ -48,17 +48,13 @@ class SimilarHeroCell: TableCellLayoutable {
         thisLayout.put(stack: hStack) { hStackLayout in
             hStackLayout.top.distance(to: label.layout.bottom, at: spacer)
             hStackLayout.height.equal(with: stackHeight)
-            hStackLayout.bottom.distanceToParent(at: margins.bottom, priority: .required)
-            hStackLayout.left.distanceToParent(at: margins.left, priority: .required)
-            hStackLayout.right.distanceToParent(at: margins.right, priority: .required)
+            hStackLayout.bottom.distanceToParent(at: margins.bottom)
+            hStackLayout.left.distanceToParent(at: margins.left)
+            hStackLayout.right.distanceToParent(at: margins.right)
             hStackLayout.putStacked(similarHero1)
             hStackLayout.putStacked(similarHero2)
             hStackLayout.putStacked(similarHero3)
         }
-    }
-    
-    override func calculatedCellHeight(for cellWidth: CGFloat) -> CGFloat {
-        return margins.top + label.font.lineHeight + spacer + stackHeight + margins.bottom
     }
     
     class Model: UITableViewCell.Model<SimilarHeroCell> {
@@ -112,12 +108,6 @@ class SimilarHeroCell: TableCellLayoutable {
                 guard let self = self, let hero = self.hero3 else { return }
                 self.didTapHero?(hero)
             }
-        }
-        
-        override func didApplying(_ view: UITableViewCell.Model<SimilarHeroCell>.View) {
-            $hero1.invokeWithCurrentValue()
-            $hero2.invokeWithCurrentValue()
-            $hero3.invokeWithCurrentValue()
         }
     }
 }

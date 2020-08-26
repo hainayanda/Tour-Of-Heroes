@@ -54,7 +54,7 @@ class ImageWithLabelCell: CollectionCellLayoutable {
             labelLayout.atBottom(of: cellImage, spacing: .x16)
             labelLayout.fixToParent(.fullBottom, with: layoutMargins)
             labelLayout.height.equal(with: labelHeight)
-            labelLayout.width.lesThan(
+            labelLayout.width.lessThan(
                 cellImage.layout.width,
                 multipliedBy: 1,
                 offsetBy: 0,

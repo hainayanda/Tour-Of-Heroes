@@ -101,7 +101,7 @@ public class DimensionLayout: LayoutBuilder, ConstraintsBuilder, Hashable {
     }
     
     @discardableResult
-    public func lesThan(
+    public func lessThan(
         _ other: DimensionLayout,
         multipliedBy multiplier: CGFloat = 1,
         offsetBy offset: CGFloat = 0,

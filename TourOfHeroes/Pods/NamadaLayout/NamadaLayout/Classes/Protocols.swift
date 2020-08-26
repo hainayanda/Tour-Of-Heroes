@@ -52,6 +52,7 @@ public protocol MoleculeLayout {
 
 public protocol StatedViewModel {
     var bindableStates: [ViewStateBindable] { get }
+    var observables: [StateObservable] { get }
 }
 
 public protocol BindableViewModel: class, Buildable, StatedViewModel {

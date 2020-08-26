@@ -21,7 +21,7 @@ class HeroCellVM: UICollectionViewCell.Model<ImageWithLabelCell> {
         $hero.observe(observer: self)
             .didSet(runIn: .main) { model, changes in
                 model.imageConvertible = changes.new.imageURL
-                model.text = changes.new.name
+                model.text = changes.new.localizedName
         }
         $imageConvertible.observe(observer: self)
             .didSet(runIn: .main) { model, changes in

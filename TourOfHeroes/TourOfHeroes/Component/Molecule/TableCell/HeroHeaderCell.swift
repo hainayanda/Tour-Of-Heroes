@@ -48,7 +48,7 @@ class HeroHeaderCell: TableCellLayoutable {
             layout.top.distanceToParent(at: topVoid)
             layout.fixToParent(.fullBottom)
             layout.put(photo) { photoLayout in
-                photoLayout.fixToParent(.fullLeft, with: margins, priority: .required)
+                photoLayout.fixToParent(.fullLeft, with: margins)
                 photoLayout.size(equalWith: imageSize, priority: .required)
             }
             layout.put(nameLabel) { nameLayout in
@@ -76,10 +76,6 @@ class HeroHeaderCell: TableCellLayoutable {
         }
     }
     
-    override func calculatedCellHeight(for cellWidth: CGFloat) -> CGFloat {
-        return topVoid + margins.top + imageSize.height + margins.bottom
-    }
-    
     class Model: UITableViewCell.Model<HeroHeaderCell> {
         @ObservableState var hero: Hero?
         @ObservableState var heroImage: ImageConvertible?
@@ -101,10 +97,6 @@ class HeroHeaderCell: TableCellLayoutable {
             $heroName.bind(with: view.nameLabel, \.text)
             $heroAttribute.bind(with: view.attributeLabel, \.text)
             $heroType.bind(with: view.typeLabel, \.text)
-        }
-        
-        override func didApplying(_ view: HeroHeaderCell) {
-            $hero.invokeWithCurrentValue()
         }
     }
 }

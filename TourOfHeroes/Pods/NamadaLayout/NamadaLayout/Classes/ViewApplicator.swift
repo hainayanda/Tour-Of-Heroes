@@ -27,7 +27,8 @@ public class ViewApplicator<View: UIView> {
         with viewState: ViewState<Property>,
         stateDidSet: @escaping (View, Changes<Property>) -> Void = { _, _ in },
         viewDidSet: @escaping (View, Changes<Property>) -> Void = { _, _ in }) -> ViewApplicator<View> {
-        bind(keyPath, with: viewState, state: .applying, stateDidSet: stateDidSet, viewDidSet: viewDidSet)
+        viewState.bindingState = .applying
+        return bind(keyPath, with: viewState, stateDidSet: stateDidSet, viewDidSet: viewDidSet)
     }
     
     @discardableResult
@@ -36,17 +37,17 @@ public class ViewApplicator<View: UIView> {
         with viewState: ViewState<Property>,
         stateDidSet: @escaping (View, Changes<Property>) -> Void = { _, _ in },
         viewDidSet: @escaping (View, Changes<Property>) -> Void = { _, _ in }) -> ViewApplicator<View> {
-        bind(keyPath, with: viewState, state: .mapping, stateDidSet: stateDidSet, viewDidSet: viewDidSet)
+        viewState.bindingState = .mapping
+        return bind(keyPath, with: viewState, stateDidSet: stateDidSet, viewDidSet: viewDidSet)
     }
     
     @discardableResult
     public func bind<Property>(
         _ keyPath: ReferenceWritableKeyPath<View, Property>,
         with viewState: ViewState<Property>,
-        state: BindingState = .none,
         stateDidSet: @escaping (View, Changes<Property>) -> Void = { _, _ in },
         viewDidSet: @escaping (View, Changes<Property>) -> Void = { _, _ in }) -> ViewApplicator<View> {
-        viewState.bind(with: view, keyPath, state: state)
+        viewState.bind(with: view, keyPath)
             .viewDidSet(then: viewDidSet)
             .stateDidSet(then: stateDidSet)
         return self

@@ -145,8 +145,10 @@ public class WrappedPropertyObserver<Wrapped> {
             }
             return
         }
+        onDelayed = true
         dispatcher.asyncAfter(deadline: .now() + throttle) { [weak self] in
             guard let self = self, let changes = self.latestChanges else { return }
+            self.onDelayed = false
             self.latestChanges = nil
             self.didSetListener?(changes)
             self.latestChangesTriggered = Date()

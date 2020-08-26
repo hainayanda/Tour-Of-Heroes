@@ -21,19 +21,13 @@ class HeroDetailScreenVM: ViewModel<HeroDetailScreen> {
     
     override func bind(with view: HeroDetailScreen) {
         super.bind(with: view)
-        $hero.observe(observer: self)
-            .throttle(by: .instant)
-            .didSet { model, changes in
+        $hero.observe(observer: self).throttle(by: .instant).didSet { model, changes in
                 model.backDrop = changes.new?.imageURL
                 model.view?.tableView.sections = model.constructCells(from: changes.new, andSimilar: model.similarHeroes)
         }
         $backDrop.observe(observer: self).didSet { model, changes in
             view.translucentBackDrop.imageConvertible = changes.new
         }
-    }
-    
-    override func didApplying(_ view: HeroDetailScreen) {
-        $hero.invokeWithCurrentValue()
     }
     
     func constructCells(from hero: Hero?, andSimilar similarHeroes: [Hero]) -> [UITableView.Section] {
