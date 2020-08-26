@@ -68,7 +68,7 @@ class HeroMainScreen: UIViewController, ObservableView {
         collection.contentInset = .init(vertical: .x4, horizontal: .x8)
         collection.delegate = self
         collection.refreshControl = refreshControl
-        collection.model.reloadStrategy = .reloadLinearDifferences
+        collection.model.reloadStrategy = .reloadArangementDifferences
         collectionLayout.minimumInteritemSpacing = .zero
         collectionLayout.minimumLineSpacing = .zero
         collectionLayout.scrollDirection = .vertical
