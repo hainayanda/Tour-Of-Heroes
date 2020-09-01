@@ -77,14 +77,11 @@ class HeroDetailScreen: UIViewController {
     }
     
     private func layoutView() {
-        makeLayout { vcLayout in
-            vcLayout.put(tableView) { tableLayout in
-                tableLayout.fillSafeArea()
-            }
-            vcLayout.put(translucentBackDrop) { backdropLayout in
-                backdropLayout.fixToParent(.fullTop)
-                backdropLayout.height.equal(with: backdropLayout.width)
-            }
+        layoutContent { content in
+            content.put(tableView).edges(.equal, to: .safeArea)
+            content.put(translucentBackDrop)
+                .at(.fullTop, .equal, to: .parent)
+                .height(.equalTo(translucentBackDrop.widthAnchor), multiplyBy: 1, constant: 0)
         }
     }
 }

@@ -11,22 +11,20 @@ import NamadaLayout
 import UIKit
 import SkeletonView
 
-class CollectionSkeletonCell: CollectionCellLayoutable {
+class CollectionSkeletonCell: CollectionMoleculeCell {
     
     // MARK: View
     lazy var skeletonImage: UIImageView = .init()
     lazy var skeletonLabel: UILabel = .init()
     
-    override func layoutChild(_ thisLayout: ViewLayout) {
-        thisLayout.put(skeletonImage) { imgLayout in
-            imgLayout.fixToParent(.fullTop, with: layoutMargins)
-            imgLayout.height.equal(with: imgLayout.width, multipliedBy: 4/3)
-        }
-        thisLayout.put(skeletonLabel) { labelLayout in
-            labelLayout.top.distance(to: skeletonImage.layout.bottom, at: .x16)
-            labelLayout.fixToParent(.fullBottom, with: .init(inset: .x8))
-            labelLayout.height.equal(with: .x16)
-        }
+    override func layoutContent(_ layout: LayoutInsertable) {
+        layout.put(skeletonImage)
+            .at(.fullTop, .equalTo(layoutMargins), to: .parent)
+            .height(.equalTo(skeletonImage.widthAnchor), multiplyBy: 4/3, constant: 0)
+        layout.put(skeletonLabel)
+            .at(.fullBottom, .equalTo(CGFloat.x8), to: .parent)
+            .top(.equalTo(.x16), to: skeletonImage.bottomAnchor)
+            .height(.equalTo(.x16))
     }
     
     override func calculatedCellSize(for collectionContentWidth: CGFloat) -> CGSize {
@@ -40,13 +38,13 @@ class CollectionSkeletonCell: CollectionCellLayoutable {
         return .init(width: cellWidth, height: cellHeight)
     }
     
-    class Model: UICollectionViewCell.Model<CollectionSkeletonCell> {
-        override func willApplying(_ view: UICollectionViewCell.Model<CollectionSkeletonCell>.View) {
-            view.layoutMargins = .init(inset: .x12)
+    class Model: CollectionViewCellModel<CollectionSkeletonCell> {
+        override func willApplying(_ view: CollectionSkeletonCell) {
+            view.layoutMargins = .init(insets: .x12)
         }
         
         override func didApplying(_ view: CollectionSkeletonCell) {
-            guard view.layoutPhase == .initial else { return }
+            guard view.layoutPhase == .firstLoad else { return }
             dispatchOnMainThread { [weak view = view] in
                 guard let view = view else { return }
                 let animation = SkeletonAnimationBuilder().makeSlidingAnimation(withDirection: .leftRight)

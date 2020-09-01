@@ -12,16 +12,24 @@ import UIKit
 
 class LargeImageWithLabelCell: ImageWithLabelCell {
     
-    override var layoutBehaviour: CellLayoutBehaviour { .editEveryLayout }
+    override open var layoutBehaviour: CellLayoutingBehaviour { .alwaysLayout }
     
-    override func layoutChild(_ thisLayout: ViewLayout) {
+    override func prepareForReuse() {
+        super.prepareForReuse()
+    }
+    
+    override func moleculeWillLayout() {
         label.font = .systemFont(ofSize: .x16, weight: .medium)
-        super.layoutChild(thisLayout)
     }
     
     override func calculatedCellSize(for collectionContentWidth: CGFloat) -> CGSize {
         let cellWidth: CGFloat = collectionContentWidth / 3
         let cellHeight: CGFloat = cellWidth * 4 / 3
         return .init(width: cellWidth, height: cellHeight)
+    }
+    
+    override func layoutOption(on phase: CellLayoutingPhase) -> SublayoutingOption {
+        guard phase != .firstLoad else { return .addNew }
+        return .removeOldAndAddNew
     }
 }

@@ -11,37 +11,37 @@ import UIKit
 import NamadaLayout
 import SkeletonView
 
-class TableSkeletonCell: TableCellLayoutable {
+class TableSkeletonCell: TableMoleculeCell {
     
     lazy var skeletonImage: UIImageView = .init()
+    lazy var verticalStack: UIStackView = build {
+        $0.isSkeletonable = true
+        $0.axis = .vertical
+        $0.alignment = .fill
+        $0.distribution = .fill
+        $0.spacing = .x8
+    }
     lazy var labels: [UILabel] = [.init(), .init(), .init(), .init()]
     lazy var skeletonLabel2: UILabel = .init()
     lazy var skeletonLabel3: UILabel = .init()
     lazy var skeletonLabel4: UILabel = .init()
     
-    override func layoutChild(_ thisLayout: ViewLayout) {
-        thisLayout.put(skeletonImage) { imageLayout in
-            imageLayout.fixToParent(.fullLeft, with: .init(inset: .x16))
-            imageLayout.size(equalWith: .init(width: .x96, height: .x128))
-        }
-        thisLayout.putVerticalStack { stackLayout in
-            for label in labels {
-                stackLayout.putStacked(label) {
-                    $0.height.equal(with: .x16)
+    override func layoutContent(_ layout: LayoutInsertable) {
+        layout.put(skeletonImage)
+            .at(.fullLeft, .equalTo(CGFloat.x16), to: .parent)
+            .size(.equalTo(.init(width: .x96, height: .x128)))
+        layout.put(verticalStack)
+            .at(.topRight, .equalTo(CGFloat.x24), to: .parent)
+            .left(.equalTo(.x16), to: .parent)
+            .bottom(.moreThanTo(.x24), to: .safeArea)
+            .layoutContent { stack in
+                for label in labels {
+                    stack.putStacked(label).height(.equalTo(.x16))
                 }
-                stackLayout.put(spacing: .x8)
-            }
-            stackLayout.fixToParent(.topRight, with: .init(inset: .x24))
-            stackLayout.left.distance(to: skeletonImage.layout.right, at: .x16)
-            stackLayout.bottom.distanceToSafeArea(moreThan: .x24)
-        }.apply {
-            $0.isSkeletonable = true
-            $0.alignment = .fill
-            $0.distribution = .fill
         }
     }
     
-    class Model: UITableViewCell.Model<TableSkeletonCell> {
+    class Model: TableViewCellModel<TableSkeletonCell> {
         override func didApplying(_ view: TableSkeletonCell) {
             dispatchOnMainThread { [weak view = view] in
                 guard let view = view else { return }

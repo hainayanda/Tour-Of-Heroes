@@ -93,12 +93,12 @@ extension UIViewController {
         let width = view.frame.width - leftMargin - rightMargin
         let offset: CGFloat = (leftMargin - rightMargin) / 2
         let container: UIView = .init(frame: .init(origin: .zero, size: .init(width: .x1024, height: .x24)))
-        container.makeLayout { layout in
-            layout.put(title) { titleLayout in
-                titleLayout.fixToParent(.vertical)
-                titleLayout.center.xAxis.distanceToParent(at: offset)
-                titleLayout.width.equal(with: width)
-            }
+        container.translatesAutoresizingMaskIntoConstraints = false
+        container.layoutContent { content in
+            content.put(title)
+                .vertical(.equal, to: .parent)
+                .centerX(.equalTo(offset), to: .parent)
+                .width(.equalTo(width))
         }
         navigationItem.titleView = container
     }
@@ -271,24 +271,21 @@ public extension UIViewController {
     }
     
     private func layoutToast(_ toastContainer: UIView, _ message: String) {
-        makeLayout { layout in
-            layout.put(toastContainer) { containerLayout in
-                containerLayout.fixToParent(.horizontal, with: .init(inset: .x64), priority: .defaultHigh)
-                containerLayout.center.yAxis.equalWithParent(priority: .defaultHigh)
-                containerLayout.width.lessThan(layout.width, multipliedBy: 1, offsetBy: -.x128, priority: .defaultHigh)
-                containerLayout.height.moreThan(.x64)
-                
-                containerLayout.putLabel { labelLayout in
-                    labelLayout.fillParent(with: .init(inset: .x8), priority: .defaultHigh)
-                }
-                .apply {
-                    $0.font = .systemFont(ofSize: .x12)
-                    $0.textColor = .white
-                    $0.textAlignment = .center
-                    $0.lineBreakMode = .byTruncatingTail
-                    $0.numberOfLines = 0
-                    $0.text = message
-                }
+        let label: UILabel = build {
+            $0.font = .systemFont(ofSize: .x12)
+            $0.textColor = .white
+            $0.textAlignment = .center
+            $0.lineBreakMode = .byTruncatingTail
+            $0.numberOfLines = 0
+            $0.text = message
+        }
+        layoutContent { content in
+            content.put(toastContainer)
+                .horizontal(.equalTo(CGFloat.x64), to: .parent)
+                .centerY(.equal, to: .parent)
+                .layoutContent { toast in
+                    toast.put(label)
+                        .edges(.equalTo(CGFloat.x8), to: .parent)
             }
         }
     }

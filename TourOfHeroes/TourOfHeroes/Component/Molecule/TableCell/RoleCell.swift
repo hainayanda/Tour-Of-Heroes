@@ -11,7 +11,7 @@ import Foundation
 import NamadaLayout
 import UIKit
 
-class RoleCell: TableCellLayoutable {
+class RoleCell: TableMoleculeCell {
     
     // MARK: View
     lazy var label: UILabel = build {
@@ -32,18 +32,12 @@ class RoleCell: TableCellLayoutable {
     let margins: UIEdgeInsets = .init(vertical: .x12, horizontal: .x16)
     let spacer: CGFloat = .x4
     
-    override func layoutChild(_ thisLayout: ViewLayout) {
-        contentView.backgroundColor = .white
-        thisLayout.put(label) { labelLayout in
-            labelLayout.fixToParent(.topLeft, with: margins)
-            labelLayout.height.equal(with: label.font.lineHeight)
-        }
-        thisLayout.put(descLabel) { descLayout in
-            descLayout.top.distance(to: label.layout.bottom, at: spacer)
-            descLayout.bottom.distanceToParent(at: margins.bottom, priority: .required)
-            descLayout.left.distanceToParent(at: margins.left, priority: .required)
-            descLayout.right.distanceToParent(moreThan: margins.right, priority: .required)
-        }
+    override func layoutContent(_ layout: LayoutInsertable) {
+        layout.put(label)
+            .at(.topLeft, .equalTo(margins), to: .parent)
+        layout.put(descLabel)
+            .top(.equalTo(spacer), to: label.bottomAnchor)
+            .at(.fullBottom, .equalTo(margins), to: .parent)
     }
     
     override func calculatedCellHeight(for cellWidth: CGFloat) -> CGFloat {
@@ -54,7 +48,7 @@ class RoleCell: TableCellLayoutable {
             + margins.bottom
     }
     
-    class Model: UITableViewCell.Model<RoleCell> {
+    class Model: TableViewCellModel<RoleCell> {
         @ObservableState var roles: [String] = []
         @ViewState var label: String?
         

@@ -18,12 +18,11 @@ class HeroDetailScreenVM: ViewModel<HeroDetailScreen> {
     
     lazy var heroRouter: HeroRouter = ConcreteHeroRouter.shared
     
-    
     override func bind(with view: HeroDetailScreen) {
         super.bind(with: view)
         $hero.observe(observer: self).throttle(by: .instant).didSet { model, changes in
-                model.backDrop = changes.new?.imageURL
-                model.view?.tableView.sections = model.constructCells(from: changes.new, andSimilar: model.similarHeroes)
+            model.backDrop = changes.new?.imageURL
+            model.view?.tableView.sections = model.constructCells(from: changes.new, andSimilar: model.similarHeroes)
         }
         $backDrop.observe(observer: self).didSet { model, changes in
             view.translucentBackDrop.imageConvertible = changes.new

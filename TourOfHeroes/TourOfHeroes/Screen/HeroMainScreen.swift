@@ -52,10 +52,9 @@ class HeroMainScreen: UIViewController, ObservableView {
     }
     
     func layoutView() {
-        makeLayout { vcLayout in
-            vcLayout.put(collection) { collectionLayout in
-                collectionLayout.fillSafeArea()
-            }
+        layoutContent { content in
+            content.put(collection)
+                .edges(.equal, to: .safeArea)
         }
     }
     

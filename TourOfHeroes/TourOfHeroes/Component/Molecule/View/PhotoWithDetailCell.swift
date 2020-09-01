@@ -10,7 +10,7 @@ import Foundation
 import NamadaLayout
 import UIKit
 
-class PhotoWithDetailCell: UIView, MoleculeLayout {
+class PhotoWithDetailCell: UIView, MoleculeView {
     
     // MARK: View
     lazy var hoverButton: UIButton = build {
@@ -32,20 +32,15 @@ class PhotoWithDetailCell: UIView, MoleculeLayout {
     
     var photoSize: CGSize = .init(width: .x72, height: .x72)
     
-    func layoutChild(_ thisLayout: ViewLayout) {
-        let labelHeight: CGFloat = label.font.lineHeight
-        thisLayout.put(photoImage) { imgLayout in
-            imgLayout.size(equalWith: photoSize, priority: .required)
-            imgLayout.inParent(.fullTop, moreThan: layoutMargins)
-            imgLayout.center.xAxis.equalWithParent()
-        }
-        thisLayout.put(label) { labelLayout in
-            labelLayout.atBottom(of: photoImage, spacing: .x12)
-            labelLayout.fixToParent(.fullBottom, with: layoutMargins)
-            labelLayout.height.equal(with: labelHeight)
-        }
-        thisLayout.put(hoverButton) { btnLayout in
-            btnLayout.fillParent()
-        }
+    func layoutContent(_ layout: LayoutInsertable) {
+        layout.put(photoImage)
+            .size(.equalTo(photoSize), priority: 1000)
+            .at(.fullTop, .moreThanTo(layoutMargins), to: .parent)
+            .centerX(.equal, to: .parent)
+        layout.put(label)
+            .top(.equalTo(.x12), to: photoImage.bottomAnchor)
+            .at(.fullBottom, .equalTo(layoutMargins), to: .parent)
+        layout.put(hoverButton)
+            .edges(.equal, to: .parent)
     }
 }

@@ -11,7 +11,7 @@ import Foundation
 import NamadaLayout
 import UIKit
 
-class SimilarHeroCell: TableCellLayoutable {
+class SimilarHeroCell: TableMoleculeCell {
     
     // MARK: View
     lazy var label: UILabel = build {
@@ -23,7 +23,7 @@ class SimilarHeroCell: TableCellLayoutable {
     }
     lazy var hStack: UIStackView = build {
         $0.alignment = .fill
-        $0.distribution = .fillEqually
+        $0.distribution = .equalCentering
         $0.spacing = .x16
     }
     lazy var similarHero1: PhotoWithDetailCell = .init()
@@ -39,25 +39,26 @@ class SimilarHeroCell: TableCellLayoutable {
         + imageHeight + imageToLabelSpace + similarHero1.label.font.lineHeight
         + similarHero1.layoutMargins.bottom
     
-    override func layoutChild(_ thisLayout: ViewLayout) {
+    override func moleculeWillLayout() {
         contentView.backgroundColor = .white
-        thisLayout.put(label) { labelLayout in
-            labelLayout.fixToParent(.topLeft, with: margins)
-            labelLayout.height.equal(with: label.font.lineHeight)
-        }
-        thisLayout.put(stack: hStack) { hStackLayout in
-            hStackLayout.top.distance(to: label.layout.bottom, at: spacer)
-            hStackLayout.height.equal(with: stackHeight)
-            hStackLayout.bottom.distanceToParent(at: margins.bottom)
-            hStackLayout.left.distanceToParent(at: margins.left)
-            hStackLayout.right.distanceToParent(at: margins.right)
-            hStackLayout.putStacked(similarHero1)
-            hStackLayout.putStacked(similarHero2)
-            hStackLayout.putStacked(similarHero3)
+    }
+    
+    override func layoutContent(_ layout: LayoutInsertable) {
+        layout.put(label)
+            .at(.topLeft, .equalTo(margins), to: .parent)
+        layout.put(hStack)
+            .centerX(.equal, to: .parent)
+            .at(.fullBottom, .equalTo(margins), to: .parent)
+            .top(.equalTo(spacer), to: label.bottomAnchor)
+            .height(.equalTo(stackHeight))
+            .layoutContent { stack in
+                stack.putStacked(similarHero1)
+                stack.putStacked(similarHero2)
+                stack.putStacked(similarHero3)
         }
     }
     
-    class Model: UITableViewCell.Model<SimilarHeroCell> {
+    class Model: TableViewCellModel<SimilarHeroCell> {
         @ObservableState var hero1: Hero?
         @ObservableState var hero2: Hero?
         @ObservableState var hero3: Hero?

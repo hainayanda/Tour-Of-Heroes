@@ -10,7 +10,9 @@ import Foundation
 import NamadaLayout
 import UIKit
 
-class ImageWithLabelCell: CollectionCellLayoutable {
+class ImageWithLabelCell: CollectionMoleculeCell {
+    
+    override open var layoutBehaviour: CellLayoutingBehaviour { .layoutOnce }
     
     // MARK: View
     lazy var cellImage: UIImageView = build {
@@ -33,34 +35,13 @@ class ImageWithLabelCell: CollectionCellLayoutable {
         label.attributedText = nil
     }
     
-    override func layoutChild(_ thisLayout: ViewLayout) {
-        let labelHeight: CGFloat = label.font.lineHeight
-        thisLayout.put(cellImage) { imgLayout in
-            imgLayout.fixToParent(.fullTop, with: layoutMargins)
-            imgLayout.width.equal(
-                with: thisLayout.width,
-                multipliedBy: 1,
-                offsetBy: -(layoutMargins.left + layoutMargins.right),
-                priority: .required
-            )
-            imgLayout.height.equal(
-                with: thisLayout.height,
-                multipliedBy: 1,
-                offsetBy: -(layoutMargins.top + .x16 + labelHeight + layoutMargins.bottom),
-                priority: .required
-            )
-        }
-        thisLayout.put(label) { labelLayout in
-            labelLayout.atBottom(of: cellImage, spacing: .x16)
-            labelLayout.fixToParent(.fullBottom, with: layoutMargins)
-            labelLayout.height.equal(with: labelHeight)
-            labelLayout.width.lessThan(
-                cellImage.layout.width,
-                multipliedBy: 1,
-                offsetBy: 0,
-                priority: .required
-            )
-        }
+    override func layoutContent(_ layout: LayoutInsertable) {
+        layout.put(cellImage)
+            .at(.fullTop, .equalTo(layoutMargins), to: .parent)
+        layout.put(label)
+            .top(.equalTo(.x16), to: cellImage.bottomAnchor)
+            .at(.fullBottom, .equalTo(layoutMargins), to: .parent)
+            .height(.equalTo(label.font.lineHeight))
     }
     
     override func calculatedCellSize(for collectionContentWidth: CGFloat) -> CGSize {

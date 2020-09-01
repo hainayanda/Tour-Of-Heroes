@@ -10,18 +10,18 @@ import Foundation
 import UIKit
 import NamadaLayout
 
-class HeroAttributeCellVM: UICollectionViewCell.Model<LargeImageWithLabelCell> {
+class HeroAttributeCellVM: CollectionViewCellModel<LargeImageWithLabelCell> {
     
     @ObservableState var imageConvertible: ImageConvertible?
-    @ViewState var primaryAttr: String?
+    @ObservableState var primaryAttr: String?
     @ObservableState var selected: Bool = false
     
     override func willApplying(_ view: LargeImageWithLabelCell) {
         view.layoutMargins = selected ?
             .init(vertical: .x8, horizontal: .x4)
             : .init(vertical: .x24, horizontal: .x12)
+        view.label.font = .systemFont(ofSize: .x16, weight: selected ? .semibold : .medium)
         view.label.textColor = selected ? .black : .darkGray
-        view.setNeedsLayout()
     }
     
     override func bind(with view: LargeImageWithLabelCell) {
@@ -30,7 +30,6 @@ class HeroAttributeCellVM: UICollectionViewCell.Model<LargeImageWithLabelCell> {
             .didSet(runIn: .main) { model, changes in
                 model.view?.cellImage.imageConvertible = changes.new
         }
-        $primaryAttr.bind(with: view.label, \.text)
         $selected.observe(observer: self)
             .didSet { model, changes in
                 guard let cell = model.view else { return }
@@ -39,13 +38,14 @@ class HeroAttributeCellVM: UICollectionViewCell.Model<LargeImageWithLabelCell> {
                 cell.layoutMargins = changes.new ?
                     .init(vertical: .x8, horizontal: .x4)
                     : .init(vertical: .x24, horizontal: .x12)
-                cell.setNeedsLayout()
-                cell.layoutIfNeeded()
+                UIView.animate(withDuration: .fluid) {
+                    cell.setNeedsLayout()
+                }
                 
         }
-    }
-    
-    override func didApplying(_ view: UICollectionViewCell.Model<LargeImageWithLabelCell>.View) {
-        view.cellImage.imageConvertible = imageConvertible
+        $primaryAttr.observe(observer: self)
+            .didSet { model, changes in
+                model.view?.label.text = changes.new
+        }
     }
 }

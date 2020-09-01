@@ -10,7 +10,7 @@ import Foundation
 import UIKit
 import NamadaLayout
 
-class HeroCellVM: UICollectionViewCell.Model<ImageWithLabelCell> {
+class HeroCellVM: CollectionViewCellModel<ImageWithLabelCell> {
     
     @ObservableState var hero: Hero = .init()
     @ObservableState var imageConvertible: ImageConvertible?
@@ -27,11 +27,9 @@ class HeroCellVM: UICollectionViewCell.Model<ImageWithLabelCell> {
             .didSet(runIn: .main) { model, changes in
                 model.view?.cellImage.imageConvertible = changes.new
         }
-        $text.bind(with: view.label, \.text)
-    }
-    
-    override func didApplying(_ view: UICollectionViewCell.Model<ImageWithLabelCell>.View) {
-        imageConvertible = hero.imageURL
-        text = hero.localizedName
+        $text.observe(observer: self)
+            .didSet { model, changes in
+                model.view?.label.text = changes.new
+        }
     }
 }

@@ -36,19 +36,14 @@ class HeroMainScreenVM: ViewModel<HeroMainScreen> {
         $heroes.observe(observer: self)
             .didSet { model, changes in
                 model.selectedAttrIndex = 0
-                model.reloadCell()
         }
         $loading.observe(observer: self)
-            .delayMultipleSetTrigger(by: 0.5)
             .didSet { model, changes in
                 guard let collection = model.view?.collection else { return }
                 guard changes.new else {
                     collection.isScrollEnabled = true
                     collection.alwaysBounceVertical = true
                     collection.isSkeletonable = false
-                    return
-                }
-                guard collection.cells.isEmpty else {
                     return
                 }
                 collection.isScrollEnabled = false
@@ -64,7 +59,6 @@ class HeroMainScreenVM: ViewModel<HeroMainScreen> {
         }
         $selectedAttrIndex.observe(observer: self)
             .didSet { model, changes in
-                guard changes.old != changes.new else { return }
                 model.reloadCell()
         }
     }
@@ -87,27 +81,25 @@ class HeroMainScreenVM: ViewModel<HeroMainScreen> {
     
     func reloadCell() {
         guard let screen = self.view else { return }
+        screen.collection.collectionViewLayout.invalidateLayout()
         screen.collection.sections = constructCell(from:  self.heroes, selectedAttribute: self.selectedAttribute)
     }
     
     func constructCell(from heroes: [HeroCollection], selectedAttribute: String?) -> [UICollectionView.Section] {
-        let builder = CollectionCellBuilder(section: .init(identifier: "hero_attribute"))
+        let builder = CollectionCellBuilder(section: .init(identifier: "hero_attributes"))
             .next(type: HeroAttributeCellVM.self, from: heroes) { cellVM, hero in
-                cellVM.cellIdentifier = "\(hero.heroes.first?.primaryAttr ?? .randomString())_\(hero.primaryAttribute == selectedAttribute)"
+                let selected = hero.primaryAttribute == selectedAttribute
+                cellVM.cellIdentifier = "\(hero.heroes.first?.primaryAttr ?? .randomString())_\(selected)"
                 cellVM.imageConvertible = hero.heroes.first?.imageURL
                 cellVM.primaryAttr = hero.primaryAttribute
-                guard let selected = selectedAttribute else {
-                    cellVM.selected = false
-                    return
-                }
-                cellVM.selected = hero.primaryAttribute == selected
+                cellVM.selected = selected
         }
         guard let selected = selectedAttribute,
             let selectedHeroes = heroes.first(where: { $0.primaryAttribute == selected }) else {
                 return builder.build()
         }
         let header: NavigatableTitledHeader.Model = build {
-            $0.cellIdentifier = "attribute_header"
+            $0.cellIdentifier = "attribute_header_\(selectedHeroes.primaryAttribute)"
             $0.title = selectedHeroes.primaryAttribute
             $0.desc = selectedHeroes.attributeDescription
             $0.shouldNavigate = { [weak self] _ in
@@ -117,7 +109,7 @@ class HeroMainScreenVM: ViewModel<HeroMainScreen> {
         return builder.nextSection(
             UICollectionView.SupplementedSection(
                 header: header,
-                identifier: "hero"
+                identifier: "heroes_\(header.cellIdentifier)"
             )
         ).next(type: HeroCellVM.self, from: Array(selectedHeroes.heroes.prefix(16))) { cellVM, hero in
             cellVM.cellIdentifier = hero.id

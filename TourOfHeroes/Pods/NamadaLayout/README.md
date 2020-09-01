@@ -1,6 +1,6 @@
 # NamadaLayout
 
-NamadaLayout is a DSL framework for Swift to make Auto layout easier.
+NamadaLayout is a DSL framework for Swift to make Auto layout easier. (This is Beta version and have no proper Unit Test, use it at your own risk)
 
 [![CI Status](https://img.shields.io/travis/nayanda/NamadaLayout.svg?style=flat)](https://travis-ci.org/nayanda/NamadaLayout)
 [![Version](https://img.shields.io/cocoapods/v/NamadaLayout.svg?style=flat)](https://cocoapods.org/pods/NamadaLayout)
@@ -19,7 +19,7 @@ NamadaLayout is available through [CocoaPods](https://cocoapods.org). To install
 it, simply add the following line to your Podfile:
 
 ```ruby
-pod 'NamadaLayout', '1.1.2-RC'
+pod 'NamadaLayout', '2.0.1-beta'
 ```
 
 ## Author
@@ -61,6 +61,16 @@ class ViewController: UIViewController {
     lazy var searchBar: UISearchBar = build {
         $0.placeholder = "placeholder"
     }
+    lazy var imageView: UIImageView = build {
+        $0.image = #imageLiteral(resourceName: "anyImage")
+        $0.contentMode = .scaleAspectFit
+    }
+    lazy var stackLayout: UIStackView = build {
+        $0.axis = .vertical
+        $0.alignment = .center
+        $0.distribution = .fill
+        $0.spacing = 9
+    }
     
     @ViewState var topTitle: String?
     @ViewState var typedText: String?
@@ -73,44 +83,38 @@ class ViewController: UIViewController {
     }
     
     func layoutView() {
-        makeLayout { vcLayout in
-            vcLayout.put(bottomButton) { buttonLayout in
-                buttonLayout.fixToSafeArea(.fullBottom, with: .init(inset: 18)).height.equal(with: 36)
+        layoutContent { content in
+            content.put(searchBar)
+                .at(.fullTop, .equal, to: .safeArea)
+                .bind(\.text, with: $typedText)
+            content.put(topLabel)
+                .at(.bottomOfAndParallelWith(searchBar), .equalTo(UIEdgeInsets(horizontal: 0, top: 18, bottom: 0)))
+                .horizontal(.moreThanTo(18), to: .parent)
+                .bind(\.text, with: $topTitle)
+            content.put(stackLayout)
+                .center(.equal, to: .parent)
+                .inBetween(of: topLabel, and: bottomButton, .vertically(.moreThanTo(18)), priority: .defaultLow)
+                .horizontal(.moreThanTo(18), to: .parent)
+                .layoutContent { stackContent in
+                    stackContent.putStacked(middleLabel)
+                        .bind(\.text, with: $middleText)
+                    stackContent.putStacked(imageView)
+                        .size(.equalTo(.init(width: 90, height: 90)))
             }
-            vcLayout.put(searchBar) { searchLayout in
-                searchLayout.fixToSafeArea(.fullTop)
-            }.bind(\.text, with: $typedText)
-            vcLayout.put(topLabel) { labelLayout in
-                labelLayout.atBottom(of: searchBar, spacing: 18)
-            }.bind(\.text, with: $topTitle)
-            vcLayout.putVerticalStack { stackLayout in
-                stackLayout.center.equalWithParent()
-                stackLayout.top.distance(to: topLabel.layout.bottom, moreThan: 18, priority: .defaultLow)
-                stackLayout.bottom.distance(to: bottomButton.layout.top, moreThan: 18, priority: .defaultLow)
-                stackLayout.inSafeArea(.horizontal, moreThan: .init(inset: 18))
-                
-                stackLayout.putStacked(middleLabel).bind(\.text, with: $middleText)
-                stackLayout.putStackedImage { logoLayout in
-                    logoLayout.size(equalWith: .init(width: 90, height: 90))
-                }.apply {
-                    $0.image = #imageLiteral(resourceName: "anyImage")
-                    $0.contentMode = .scaleAspectFit
-                }
-            }.apply {
-                $0.alignment = .center
-                $0.distribution = .fill
-                $0.spacing = 9
-            }
+            content.put(bottomButton)
+                .at(.fullBottom, .equalTo(18), to: .safeArea)
+                .height(.equalTo(36))
+            
         }
     }
     
     func listen() {
         $topTitle.observe(observer: self).didSet { viewController, changes in
-            viewController.middleLabel.text = "new: \(changes.new ?? "null"), old: \(changes.old ?? "null")"
+            viewController.middleText = "new: \(changes.new ?? "null"), old: \(changes.old ?? "null")"
         }
         $typedText.observe(observer: self).didSet { viewController, changes in
             guard let _ = changes.trigger.triggeringView else { return }
-            viewController.topLabel.text = "typed: \(changes.new ?? "null")"
+            viewController.topTitle = "typed: \(changes.new ?? "null")"
         }
     }
 }
@@ -121,259 +125,260 @@ It will automatically put view as closure hierarchy, create all constraints insi
 
 ### Basic
 
-There are four main function to create layout which is:
-- `makeLayout(_ builder: (ViewLayout) -> Void)`
-- `makeAndEditLayout(_ builder: (ViewLayout) -> Void)`
-- `remakeLayout(_ builder: (ViewLayout) -> Void)`
-- `makeLayoutCleanly(_ builder: (ViewLayout) -> Void)`
-all the method are can be used in UIViewController and UIView.
+There are two main function to create layout which is:
+- `layout(withDelegate delegate: NamadaLayoutDelegate?, _ options: SublayoutingOption, _ layouter: (ViewLayout<Self>) -> Void)`
+- `layoutContent(withDelegate delegate: NamadaLayoutDelegate? = nil, _ options: SublayoutingOption, _ layouter: (LayoutContainer<Self>) -> Void)`
+all the method can be used in UIViewController and UIView.
 The difference between those three is
-- `makeLayout` is the faster one, since its just adding constraints without worrying about existing constraints. Its better when use just once on first load
-- `makeAndEditLayout` will search for the duplicated constraints and edit them with new constraints or add new constraint if there's none.
-- `remakeLayout` will remove all the constraints created by NamadaLayout and add a new one.
-- `makeLayoutCleanly` will remove all existing child view from the layout which in effect will remove all constraints those child have
+- `layout` are used to layout the Constraints of the view.
+- `layoutContent` are used to layout content of the view ignoring it's own constraints.
 
-all the method will accept closure with `ViewLayout` parameter. Its the abstraction of the `UIView` layout in the context.
+both accept SubLayoutingOption enumeration which is:
+- `addNew` which will add new constraints ignoring the current constraints of the view, This is the default value
+- `editExisting` which will edit existing same constraints relation between views created by NamadaLayout, and added constraints if it's new. Since it's literraly will check the same constraint's relation, it will be slightly slower than `addNew`
+- `removeOldAndAddNew` which will remove all current constraints created by NamadaLayout and added new constraints. Since it's literraly will check all the constraint's identifier, it will be slightly slower than `addNew`
+- `cleanLayoutAndAddNew` which will remove all subviews from it's parent which in effect will removing all of it's constraints. Since it's literraly will loop all subviews and remove it from superview, it will be slightly slower than `addNew`, but should be faster than `editExisting` and `removeOldAndAddNew`
+
+we will talk about the delegate later.
 
 example:
 
-```swift
 ```swift
 class ViewController: UIViewController {
     ...
     ...
     override func viewDidLoad() {
         super.viewDidLoad()
-        makeLayout { layout in
-            layout.put(someView) { someLayout in
-                ...
-                ...
-            }
-            layout.put(someOtherView) { someOtherLayout in
-                ...
-                ...
-                someOtherLayout.put(childView) {
-                    ...
-                    ...
-                }
-            }
+        layoutContent { content in
+            content.put(someView)
         }
     }
 }
 ```
-The above code will add `someView` and `someOtheView` to the `UIViewController` view, `childView` to `someOtherView` and apply all created constraints in the closure.
+The above code will add `someView`  into ViewController view child
 
 ```swift
-```swift
-class SomeCell: UITableViewCell {
+class ViewController: UIViewController {
     ...
     ...
-    override func layoutSubViews() {
-        super.layoutSubViews()
-        makeLayout { layout in
-            layout.put(someView) { someLayout in
-                ...
-                ...
-            }
-            layout.put(someOtherView) { someOtherLayout in
-                ...
-                ...
-                someOtherLayout.put(childView) {
-                    ...
-                    ...
-                }
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        layoutContent { content in
+        content.put(someView)
+            .layoutContent { someViewContent in
+                someViewContent.put(someOtherview)
             }
         }
     }
 }
 ```
-The above code will add `someView` and `someOtheView` to the `UITableView` `contentView`, `childView` to `someOtherView` and apply all created constraints in the closure. The same case will happen at `UICollectionViewCell` too
+The above code will add `someView`  into ViewController view child, and then put `someOtherView` into `someView` child.
+
+If you have stackView, you can put your view stacked inside or not too:
 
 ```swift
-parentView.makeLayout { layout in
-    layout.put(someView) { someLayout in
-        ...
-        ...
-    }
-    layout.put(someOtherView) { someOtherLayout in
-        ...
-        ...
-        someOtherLayout.put(childView) {
-            ...
-            ...
+class ViewController: UIViewController {
+    ...
+    ...
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        layoutContent { content in
+        content.put(someStack)
+            .layoutContent { someStackContent in
+                someStackContent.putStacked(stackedView)
+                someStackContent.putStacked(otherStacked)
+                someStackContent.put(someOtherview)
+            }
         }
     }
 }
-```swift
-
 ```
-The above code will add `someView` and `someOtheView` to the `parentView`, `childView` to `someOtherView` and apply all created constraints in the closure.
+The above code will add `someStack`  into ViewController view child, and then put `stackedView` and `otherStacked` into `stackedView` arranged child and put `someOtherview` inside `someStack` but not stacked.
 
 You can embed `UIViewController` too:
 ```swift
-parentView.makeLayout { layout in
-    layout.put(someViewController) { someVCLayout in
-        ...
-        ...
+class ViewController: UIViewController {
+    ...
+    ...
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        layoutContent { content in
+            content.put(someViewController)
+        }
     }
 }
 ```
 
 
-### Position to other
+### Position Constraint
 
-To make constraints between two `UIView`, you can just do something like this:
+All layout have edges and you can create very readable constraints like this: 
 ```swift
-makeLayout { layout in
-    layout.put(someView) { someLayout in
-        someLayout.top.equal(with: otherView.layout.top)
-        someLayout.left.distance(to: otherView.layout.right, at: 18)
-        someLayout.bottom.equal(with: otherView.layout.bottom, moreThan: 18)
-        someLayout.right.distance(to: anyOtherView.layout.left, lessThan: 18)
-        someLayout.center.equal(with: centeredView.layout.center)
+class ViewController: UIViewController {
+    ...
+    ...
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        layoutContent { content in
+            content.put(someView)
+                .top(.equal, to: topView.bottomAnchor)
+                .left(.moreThan, to: leftView.rightAnchor)
+                .right(.lessThan, to: rightView.leftAnchor)
+                .bottom(.equalTo(18), to: bottomView.topAnchor)
+                .centerY(.moreThanTo(9), to: centerView.centerYAnchor)
+                .centerX(.lessThanTo(4.5), to: centerView.centerXAnchor)
+        }
     }
 }
 ```
-The above code is adding `someView` into layout and then creating this constraints:
-- `someView` top is equal to `otherView` top
-- `someView` left is equal to` otherView` right with spacing equal to 18
-- `someView` bottom is have spacing to `otherView` bottom greater than or equal 18
-- `someView` right is have spacing to `anyOtherView` left less than or equal 18
-- `someView` center is equal to `centeredView` top
+The above code is adding `someView` into ViewController view childs and then creating this constraints:
+- `someView` top is equal to `topView` bottom
+- `someView` left is greaterThanOrEqual to `leftView` right
+- `someView` right is lessThanOrEqual to `rightView` left
+- `someView` bottom equal to distance to `bottomView` top by 18
+- `someView` centerY greaterThanOrEqual to distance to `bottomView` centerY by 9
+- `someView` centerX lessThanOrEqual to distance to `bottomView` centerX by 4.5
 
-If you want to make view to parallel with other view at some position, you can just do this
-
-```swift
-makeLayout { layout in
-    layout.put(someView) { someLayout in
-        someLayout.atBottom(of: topView)
-        someLayout.atLeft(of: leftView, spacing: 18)
-        someLayout.atRight(of: rightView, moreThan: 18)
-        someLayout.atBottom(of: bottomView, lessThan: 18)
-    }
-}
-```
-The above code is add `someView` into layout and then creating this constraints:
-- `someView` is at the bottom of `topView`, which means, it's center x axis is same as `topView` center x axis
-- `someView` is at the left of `leftView` with spacing  at 18, which means, it's center y axis is same as` leftView` center y axis
-- `someView` is at the right of `rightView` with spacing greater than or equal 18, which means, it's center y axis is same as `rightView` center y axis
-- `someView` is at the bottom of `bottomView` with spacing  less than or equal 18, which means, it's center x axis is same as `bottomView` center x axis
-
-### Position in parent
-
-Let's say you want to add tableView inside the `UIViewController` which fill the view. You can just do this:
+If you want to make View Constraints with its parent then just pass `.parent` or `.safeArea` instead:
 
 ```swift
-makeLayout { layout in
-    layout.put(tableView) { tableLayout in
-        tableLayout.top.equalWithParent()
-        tableLayout.bottom.equalWithParent()
-        tableLayout.left.equalWithParent()
-        tableLayout.right.equalWithParent()
+class ViewController: UIViewController {
+    ...
+    ...
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        layoutContent { content in
+            content.put(someView)
+                .top(.equal, to: .safeArea)
+                .left(.moreThan, to: .parent)
+                .right(.lessThan, to: parent)
+                .bottom(.equalTo(18), to: safeArea)
+        }
     }
 }
 ```
+The above code is adding `someView` into ViewController view childs and then creating this constraints:
+- `someView` top is equal to its parent's top
+- `someView` left is greaterThanOrEqual to its parent's left
+- `someView` right is lessThanOrEqual to its parent's right
+- `someView` bottom equal to distance to its parent's bottom
 
-or even simpler:
+There are some shortcut to create multiple constraint at once like:
 
 ```swift
-makeLayout { layout in
-    layout.put(tableView) { tableLayout in
-        tableLayout.fillParent()
+class ViewController: UIViewController {
+    ...
+    ...
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        layoutContent { content in
+            content.put(someView)
+                .center(.equal, to: otherView)
+                .vertical(.moreThanTo(18), to: .safeArea)
+                .horizontal(.lessThanTo(UIHorizontalInsets(left: 9, right: 18)), to: .parent)
+            content.put(tableView)
+                .edges(.equalTo(18), to: .parent)
+            content.put(imageView)
+                .inBetween(of: someView, and: otherView, .horizontally(.equal))
+            content.put(logoView)
+                .at(.topLeft, equalTo(9), to: .safeArea)
+                .at(.topOf(otherView), .equal)
+        }
+        
     }
 }
 ```
-
-or if you prefer constrainted to safe area
-
-```swift
-makeLayout { layout in
-    layout.put(tableView) { tableLayout in
-        tableLayout.top.equalWithSafeArea()
-        tableLayout.bottom.equalWithSafeArea()
-        tableLayout.left.equalWithSafeArea()
-        tableLayout.right.equalWithSafeArea()
-    }
-}
-```
-
-in simpler code:
-
-```swift
-makeLayout { layout in
-    layout.put(tableView) { tableLayout in
-        tableLayout.fillSafeArea()
-    }
-}
-```
-
-if you want to add inset, then you can do this
-
-```swift
-makeLayout { layout in
-    layout.put(tableView) { tableLayout in
-        tableLayout.top.distanceToSafeArea(at: 18)
-        tableLayout.bottom.distanceToSafeArea(at: 18)
-        tableLayout.left.distanceToSafeArea(at: 18)
-        tableLayout.right.distanceToSafeArea(at: 18)
-    }
-}
-```
-
-or in simpler code:
-
-```swift
-makeLayout { layout in
-    layout.put(tableView) { tableLayout in
-        tableLayout.fillSafeArea(with: .init(inset: 18))
-    }
-}
-```
-
-you can use `greater than or equal`  or  `less than or equal` too, like this: 
-
-```swift
-makeLayout { layout in
-    layout.put(tableView) { tableLayout in
-        tableLayout.top.distanceToSafeArea(lessThan: 18)
-        tableLayout.bottom.distanceToSafeArea(moreThan: 18)
-        tableLayout.left.distanceToParent(lessThan: 18)
-        tableLayout.right.distanceToParent(moreThan: 18)
-    }
-}
-```
+- `center` is shortcut to set `centerX` and `centerY` to other view simultaniously
+- `vertical` is shortcut to set `top` and `bottom` to parent or safeArea simultaniously
+- `horizontal` is shortcut to set `top` and `bottom` to parent or safeArea simultaniously
+- `edges` is shortcut to set `top`, `bottom`, `left` and `right` to parent or safeArea simultaniously
+- `inBetween` is shortcut to set `top` and `bottom` or `left` and `right` to two view simultaniously
+- `at` is shortcut to set `top`, `bottom`, `left` or `right` to parent or safeArea simultaniously
+- `at` can be other shortcut too to set `top`, `bottom`, `left`, `right` and center to other view simultaniously
 
 ### Dimension Constraints
 
 To define dimension relation with other you can just do something like this:
-
 ```swift
-makeLayout { layout in
-    layout.put(someView) { someLayout in
-        someLayout.height.equal(with: otherView.layout.height)
-        someLayout.width.lessThan(otherView.layout.height)
-        someLayout.height.moreThan(100)
-        someLayout.widht.lessThan(100)
+class ViewController: UIViewController {
+    ...
+    ...
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        layoutContent { content in
+            content.put(someView)
+                .width(.equalTo(.parent), multiplyBy: 0.75, constant: 18)
+                .height(.lessThanTo(90))
+                .height(moreThanTo(otherView.heightAnchor))
+        }
     }
 }
 ```
-The above code is add `someView` into layout and then creating this constraints:
-- `someView` height is equal to `otherView` height
-- `someView` width is less than or equal to` otherView` height
-- `someView` height is greater than or equal 100
-- `someView` width is less than or equal 100
+The above code is adding `someView` into ViewController view childs and then creating this constraints:
+- `someView` width is equal to parent, multiplied by 0.75, added 18.
+- `someView` height is lessThanOrEqual to 90
+- `someView` height is greaterThanOrEqual to its otherView's height
+
+There are some shortcuts too:
+
+```swift
+class ViewController: UIViewController {
+    ...
+    ...
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        layoutContent { content in
+            content.put(someView)
+            .size(.lessThan(otherView), multiplyBy: 0.75, constant: 18)
+            .size(.moreThan(CGSize(widht: 90, height: 90)))
+        }
+    }
+}
+```
+
+which can be described by the code above
 
 ### Priority
 
-To define constraint priority, just pass `UILayoutPriority` at any method you want. If you don't pass priority, it will assign the priority using simple rules which is the first constraint will be have more priority than the second, and so on.
+To define constraint priority, just pass `UILayoutPriority` at any method you want. If you don't pass priority, it will assign the priority using simple rules which is the first constraint will be have more priority than the second, and so on. The start default priority is 999
 
 ```swift
-makeLayout { layout in
-    layout.put(someView) { someLayout in
-        someLayout.height.equal(with: otherView.layout.height, priority: .defaultHigh)
-        someLayout.width.lessThan(otherView.layout.width, priority: .defaultLow)
-        someLayout.height.moreThan(100, priority: .init(1))
-        someLayout.widht.lessThan(100)
+class ViewController: UIViewController {
+    ...
+    ...
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        layoutContent { content in
+            content.put(someView)
+                .top(.equal, to: .safeArea, priority: UILayoutPriority.required)
+                .left(.moreThan, to: .parent, priority: UILayoutPriority.defaultHigh)
+                .right(.lessThan, to: parent, priority: UILayoutPriority.defaultLow)
+                .bottom(.equalTo(18), to: safeArea, priority: 1000)
+        }
+    }
+}
+```
+
+### ViewApplicator
+
+If you want to setup the view during layout. You can just use `ViewApplicator` after layouting
+
+```swift
+class ViewController: UIViewController {
+    ...
+    ...
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        layoutContent { content in
+            content.put(someView)
+                .top(.equal, to: .safeArea)
+                .left(.moreThan, to: .parent)
+                .right(.lessThan, to: parent)
+                .bottom(.equalTo(18), to: safeArea)
+                .apply {
+                    $0.backgroundColor = .white
+                }
+        }
     }
 }
 ```
@@ -383,145 +388,104 @@ makeLayout { layout in
 There's a delegate which can passed when you create layout:
 
 ```swift
-public protocol LayoutBuilderDelegate: class {
-    func layoutBuilderNeedParent<Layout: LayoutBuilder>(_ layout: Layout) throws -> Layout?
-    func layoutBuilderNeedViewController(_ layout: ViewLayout) throws -> UIViewController?
-    func layoutBuilder<Layout: LayoutBuilder>(_ layout: Layout, relateWith sameLayout: Layout) throws
-    func layoutBuilder<Layout: LayoutBuilder>(_ layout: Layout, onError error: LayoutError)
+public protocol NamadaLayoutDelegate: class {
+    func namadaLayout(viewHaveNoSuperview view: UIView) -> UIView?
+    func namadaLayout(neededViewControllerFor viewController: UIViewController) -> UIViewController?
+    func namadaLayout(_ view: UIView, erroWhenLayout error: NamadaError)
 }
 ```
 
 All the method are optional since all the default implementation are already defined in the extensions. The purpose of each methods are:
-- `layoutBuilderNeedParent<Layout: LayoutBuilder>(_ layout: Layout) throws -> Layout?`
+- `namadaLayout(viewHaveNoSuperview view: UIView) -> UIView?`
 will be called when you call relation with parent, but your layout is have no parent (like in top view in UIViewController). The default implementation will be throw LayoutError
-- `layoutBuilderNeedViewController(_ layout: ViewLayout) throws -> UIViewController?`
+- `func namadaLayout(neededViewControllerFor viewController: UIViewController) -> UIViewController?`
 will be called when you embed UIViewController, but your layout have no UIViewController (like in UITableViewCell). The default implementation will be throw LayoutError
-- `layoutBuilder<Layout: LayoutBuilder>(_ layout: Layout, relateWith sameLayout: Layout) throws`
-will be called when you assign same anchor to be relate, like when you set view left to equal its own left. The default implementation will be throw LayoutError
-- `layoutBuilder<Layout: LayoutBuilder>(_ layout: Layout, onError error: LayoutError)`
+- `func namadaLayout(_ view: UIView, erroWhenLayout error: NamadaError)`
 will be called when you there's any LayoutError when creating constraints.
 
-You can pass the delegate like this: 
+You can pass the delegate when first call layoutContent or layout like this this: 
 
 ```swift
-makeLayout(yourDelegate) { layout in
-    layout.put(someView) { someLayout in
-        ...
-        ...
-    }
+layoutContent(withDelegate: yourDelegate) { content in
+    ...
+    ...
 }
 ```
-`remakeLayout` and `makeAndEditLayout` can be accept delegate too.
 
 ## Molecule
 
-You can create molecule using MoleculeLayout protocol:
+You can create molecule using MoleculeView protocol:
 
 ```swift
-class MoleculeView: UIView, MoleculeLayout {
+class MoleculeView: UIView, MoleculeView {
     ...
     ...
     ...
-    func layoutChild(_ thisLayout: ViewLayout) {
-        thisLayout.put(someView) { someLayout in
-            ...
-            ...
-        }
-        thisLayout.put(someOtherView) { someOtherLayout in
-            ...
-            ...
-            someOtherLayout.put(childView) {
-                ...
-                ...
-            }
-        }
+    func layoutContent(_ layout: LayoutInsertable) {
+        layout.put(someView)
+        ...
+        ...
+        layout.put(someOtherView)
+        ...
+        ...
     }
 }
 ```
 
-The layoutChild will be called if the `MoleculeView` is added to superView using `makeLayout`, `remakeLayout` or `makeAndEditLayout`
+The layoutContent will be called if the `MoleculeView` is added to superView using `layout`, or `layoutContent`
+
+MoleculeView have optional func which are:
+
+- `moleculeWillLayout()` which will run before layouting
+- `moleculeDidLayout()` which will run after layouting
 
 ### Cell Molecule
 
-You can create Cell (UITableViewCell or UICollectionViewCell) Molecule. Just extend CollectionCellLayoutable for UICollectionViewCell or TableCellLayoutable for UITableViewCell.
+You can create Cell (UITableViewCell or UICollectionViewCell) Molecule. Just extend `CollectionMoleculeCell` for UICollectionViewCell or `TableMoleculeCell` for UITableViewCell.
 
 ```swift
-class MoleculeCell: TableCellLayoutable {
+class MyTableCell: TableCellLayoutable {
     ...
     ...
     
-    override var layoutBehaviour: CellLayoutBehaviour { .remakeEveryLayout }
+    override var layoutBehaviour: CellLayoutBehaviour { .layoutOn(.reused) }
     
-    override func layoutChild(_ thisLayout: ViewLayout) {
-        thisLayout.put(someView) { someLayout in
-            ...
-            ...
-        }
-        thisLayout.put(someOtherView) { someOtherLayout in
-            ...
-            ...
-            someOtherLayout.put(childView) {
-                ...
-                ...
-            }
-        }
+    override func layoutContent(_ thisLayout: layout) {
+        layout.put(someView)
+        ...
+        ...
+        layout.put(someOtherView)
+        ...
+        ...
     }
 }
 ```
 
 LayoutChild will run when the cell first layout, or depends on CellLayoutBehaviour if you override it. The behaviour are:
-- `once` wich will ensure layoutChild only run once on the first layout
-- `remakeEveryLayout` wich will remake layout every Cell layoutSubviews method is run or when Cell is reused
-- `editEveryLayout` wich will make and edit layout every Cell layoutSubviews method is run or when Cell is reused
-- `custom` which will automatically invoke shouldLayout(on:) method before layouting
+- `layoutOnce` wich will ensure layoutChild only run once on the first layout
+- `layoutOn(CellLayoutingPhase)` wich will layout on first layout and on phase
+- `layoutOnEach([CellLayoutingPhase])` wich will layout on first layout and on each phasses
+- `alwaysLayout` wich will layout on every phase
 
-If you're using custom CellBehaviour, you're mandatory should override `shouldLayout(on phase: CellLayouting) -> LayoutingStrategy`, otherwise it will throw fatal errror.
+the phase are:
+- `firstLoad`
+- `setNeedsLayout`
+- `setNeedsDisplay`
+- `reused`
+- `none`
+
+you can implement `func layoutOption(on phase: CellLayoutingPhase) -> SublayoutingOption` to tell which SubLayoutingOption you want for every phase. the default is `.addNew` on firstLoad and `.removeOldAndAddNew` for the rest
 
 ```swift
 class MoleculeCell: TableCellLayoutable {
     ...
     ...
     
-    override var layoutBehaviour: CellLayoutBehaviour { .custom }
-    
-    override func layoutChild(_ thisLayout: ViewLayout) {
-        thisLayout.put(someView) { someLayout in
-            ...
-            ...
-        }
-        thisLayout.put(someOtherView) { someOtherLayout in
-            ...
-            ...
-            someOtherLayout.put(childView) {
-                ...
-                ...
-            }
-        }
-    }
-    
-    override func shouldLayout(on phase: CellLayouting) -> LayoutingStrategy {
-        switch phase {
-        case .reused:
-            return .remakeLayout
-        default:
-            return .none
-        }
+    func layoutOption(on phase: CellLayoutingPhase) -> SublayoutingOption {
+        return .removeOldAndAddNew
     }
 }
 ```
-
-The CellLayouting phase are:
-- `reused` which triggered when cell is in reuse state
-- `needsLayoutSet` which triggered when cell setNeedsLayout is set
-- `initial` which triggered on the initial creation of cell
-- `none` which is triggered from layoutSubviews but from none of the above phases
-
-and you can return the following LayoutStrategy:
-- `makeAndEditLayout` which will layouting using makeAndEditLayout
-- `remakeLayout` which will layouting using remakeLayout
-- `makeLayout` which will layouting using makeLayout
-- `makeLayoutCleanly` which will layouting using makeLayoutCleanly
-- `none` which will not do any layout
 
 If your `UITableView` or `UICollectionView` have custom calculated size, you can just override `calculatedCellSize(for collectionContentWidth: CGFloat) -> CGSize` for UICollectionViewCell and `calculatedCellHeight(for cellWidth: CGFloat) -> CGFloat` for UITableViewCell.
 
@@ -607,41 +571,36 @@ The viewDidSet will run when view property is changing. The stateDidSet will run
 Or you can bind when layouting using `ViewApplicator`:
 
 ```swift
-thisLayout.put(yourSearchBarToBind) { yourSearchBarToBindLayout in
-    ...
-    ...
-}.bind(\.text, with: $searchPhrase)
+layoutContent { content in
+content.put(searchBar)
+    .at(.fullTop, .equal, to: .safeArea)
+    .bind(\.text, with: $typedText)
 ```
 or
 ```swift
-thisLayout.put(yourSearchBarToBind) { yourSearchBarToBindLayout in
-    ...
-    ...
-}.apply(\.text, with: $searchPhrase)
+layoutContent { content in
+content.put(searchBar)
+    .at(.fullTop, .equal, to: .safeArea)
+    .apply(\.text, with: $typedText)
 ```
 or
 ```swift
-thisLayout.put(yourSearchBarToBind) { yourSearchBarToBindLayout in
-    ...
-    ...
-}.map(\.text, with: $searchPhrase)
+layoutContent { content in
+content.put(searchBar)
+    .at(.fullTop, .equal, to: .safeArea)
+    .map(\.text, with: $typedText)
 ```
 
 To add binding observer when layouting using `ViewApplicator` is like this:
 
 ```swift
-thisLayout.put(yourSearchBarToBind) { yourSearchBarToBindLayout in
-    ...
-    ...
-}.bind(\.text, with: $searchPhrase, stateDidSet: { searchBar, changes in
-    let newValue = changes.newValue
-    let oldValue = changes.oldValue
-    // do something when state changes
-}, viewDidSet: { searchBar, changes in
-    let newValue = changes.newValue
-    let oldValue = changes.oldValue
-    // do something when view changes
-})
+content.put(searchBar)
+    .at(.fullTop, .equal, to: .safeArea)
+    .bind(\.text, with: $searhPhrase, viewDidSet: { searchBar, changes in
+        let newValue = changes.newValue
+        let oldValue = changes.oldValue
+        // do something when view changes
+}
 ```
 
 ### One way binding
@@ -679,22 +638,21 @@ keep in mind, state didSet will not applicable when doing one way binding.
 Or you can bind when layouting using `ViewApplicator`:
 
 ```swift
-thisLayout.put(yourSearchBarToBind) { yourSearchBarToBindLayout in
-    ...
-    ...
-}.oneWayBind(\.text, with: $searchPhrase)
+layoutContent { content in
+content.put(searchBar)
+    .at(.fullTop, .equal, to: .safeArea)
+    .oneWayBind(\.text, with: $typedText)
 ```
 
 To add binding observer when layouting using `ViewApplicator` is like this:
 
 ```swift
-thisLayout.put(yourSearchBarToBind) { yourSearchBarToBindLayout in
-    ...
-    ...
-}.bind(\.text, with: $searhPhrase, viewDidSet: { searchBar, changes in
-    let newValue = changes.newValue
-    let oldValue = changes.oldValue
-    // do something when view changes
+content.put(searchBar)
+    .at(.fullTop, .equal, to: .safeArea)
+    .oneWayBind(\.text, with: $searhPhrase, viewDidSet: { searchBar, changes in
+        let newValue = changes.newValue
+        let oldValue = changes.oldValue
+        // do something when view changes
 }
 ```
 
@@ -814,26 +772,15 @@ you can apply, map or just bind your view to ViewModel just like usual binding. 
 
 ### Cell View Model
 
-To create View Model for cell which will support reusability of cell, you can use `UICollectionViewCell.Model<Cell: UICollectionViewCell>` for Collection and `UITableViewCell.Model<Cell: UITableViewCell>` for Table. The rest is same like ViewModel, except the generic parameter.
+To create View Model for cell which will support reusability of cell, you can use `CollectionViewCellModel<Cell: UICollectionViewCell>` for Collection and `TableViewCellModel<Cell: UITableViewCell>` for Table. The rest is same like ViewModel, except the generic parameter.
 
 ```swift
-class MyCellView: CollectionCellLayoutable {
-    lazy var image: UIImageView = .init()
-    lazy var label: UILabel = .init()
-    
-    override func layoutChild(_ thisLayout: ViewLayout) { 
-        thisLayout.put(image) {
-            ...
-            ...
-        }
-        thisLayout.put(label) {
-            ...
-            ...
-        }
-    }
+class MyCellView: CollectionMoleculeCell {
+    ...
+    ...
 }
 
-class MyCellViewModel: UICollectionViewCell.ViewModel<MyCellView> {
+class MyCellViewModel: CollectionViewCellModel<MyCellView> {
     @ViewState image: UIImage?
     @ViewState text: String?
     
@@ -883,6 +830,18 @@ let cellModels: [CollectionCellModel] = items.compactMap { item in
 table.cells = cellModels
 ```
 
+or by using `CollectionCellBuilder` or `TableCellBuilder`
+
+```swift
+let cellSections: [UICollectionView.Section] = CollectionCellBuilder(.init(identifier: "first_section"))
+    .next(type: MyCellViewModel.self, from: items) { cell, item in
+        cell.cellIdentifier = item.itemId
+        cell.image = item.image
+        cell.text = item.itemName
+}
+table.sections = cellSections
+```
+
 It will automatically reload existing cells with new cells and only reload cell with different cellIdentifier. Cell identifier can be anything as long as it's Hashable
 
 If your table pr collection is sectionable, you can create section with cells and assign it to table sections:
@@ -930,4 +889,4 @@ let collectionModel: UICollectionView.Model = table.model
 
 ## Contribute
 
-Clone and do pull request
+You know how, just clone and do pull request

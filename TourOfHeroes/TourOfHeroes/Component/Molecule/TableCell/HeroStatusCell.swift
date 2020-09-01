@@ -11,7 +11,7 @@ import Foundation
 import NamadaLayout
 import UIKit
 
-class HeroStatusCell: TableCellLayoutable {
+class HeroStatusCell: TableMoleculeCell {
     
     // MARK: View
     lazy var label: UILabel = build {
@@ -36,64 +36,75 @@ class HeroStatusCell: TableCellLayoutable {
     }
     lazy var healthLabel: LabelWithDetail = build {
         $0.label.text = "Health"
+        $0.detail.text = "-"
     }
     lazy var manaLabel: LabelWithDetail = build {
         $0.label.text = "Mana"
+        $0.detail.text = "-"
     }
     lazy var attackLabel: LabelWithDetail = build {
         $0.label.text = "Attack"
+        $0.detail.text = "-"
     }
     lazy var speedLabel: LabelWithDetail = build {
         $0.label.text = "Speed"
+        $0.detail.text = "-"
     }
     lazy var armourLabel: LabelWithDetail = build {
         $0.label.text = "Armour"
+        $0.detail.text = "-"
     }
     lazy var rangeLabel: LabelWithDetail = build {
         $0.label.text = "Range"
+        $0.detail.text = "-"
     }
+    lazy var spacerView1: UIView = .init()
+    lazy var spacerView2: UIView = .init()
     
     // MARK: Dimensions
     let margins: UIEdgeInsets = .init(vertical: .x4, horizontal: .x16)
     let underlineHeight: CGFloat = .x2
     let spacer: CGFloat = .x4
     let hiSpacer: CGFloat = .x24
-    let statHeight: CGFloat = .x48
+    let statHeight: CGFloat = .x64
     let stackSpacing: CGFloat = .x8
     lazy var stackHeight: CGFloat = statHeight + stackSpacing + statHeight
     
-    override func layoutChild(_ thisLayout: ViewLayout) {
+    override func moleculeWillLayout() {
         contentView.backgroundColor = .white
-        thisLayout.put(label) { labelLayout in
-            labelLayout.fixToParent(.topLeft, with: margins)
-            labelLayout.height.equal(with: label.font.lineHeight)
+    }
+    
+    override func layoutContent(_ layout: LayoutInsertable) {
+        layout.put(label)
+            .at(.topLeft, .equalTo(margins), to: .parent)
+        layout.put(underline)
+            .at(.bottomOf(label), .equalTo(spacer))
+            .left(.equal, to: label.leftAnchor)
+            .right(.equal, to: label.rightAnchor)
+            .height(.equalTo(underlineHeight))
+        layout.put(hStack1)
+            .top(.equalTo(hiSpacer), to: underline.bottomAnchor)
+            .height(.equalTo(statHeight))
+            .horizontal(.equalTo(margins), to: .parent)
+            .layoutContent { content in
+                content.putStacked(healthLabel)
+                content.putStacked(manaLabel)
+                content.putStacked(attackLabel)
+                content.putStacked(speedLabel)
         }
-        thisLayout.put(underline) { layout in
-            layout.atBottom(of: label, spacing: spacer)
-            layout.width.equal(with: label.layout.width)
-            layout.height.equal(with: underlineHeight)
-        }
-        thisLayout.put(stack: hStack1) { hStackLayout1 in
-            hStackLayout1.top.distance(to: underline.layout.bottom, at: hiSpacer)
-            hStackLayout1.height.equal(with: statHeight)
-            hStackLayout1.fixToParent(.horizontal, with: margins)
-            hStackLayout1.putStacked(healthLabel)
-            hStackLayout1.putStacked(manaLabel)
-            hStackLayout1.putStacked(attackLabel)
-            hStackLayout1.putStacked(speedLabel)
-        }
-        thisLayout.put(stack: hStack2) { hStackLayout2 in
-            hStackLayout2.top.distance(to: hStack1.layout.bottom, at: stackSpacing)
-            hStackLayout2.height.equal(with: statHeight)
-            hStackLayout2.fixToParent(.fullBottom, with: margins)
-            hStackLayout2.putStacked(armourLabel)
-            hStackLayout2.putStacked(rangeLabel)
-            hStackLayout2.putStackedView(restorationId: "empty_view_1", { _ in })
-            hStackLayout2.putStackedView(restorationId: "empty_view_2",  { _ in })
+        layout.put(hStack2)
+            .top(.equalTo(stackSpacing), to: hStack1.bottomAnchor)
+            .height(.equalTo(statHeight))
+            .at(.fullBottom, .equalTo(margins), to: .parent)
+            .layoutContent { content in
+                content.putStacked(armourLabel)
+                content.putStacked(rangeLabel)
+                content.putStacked(spacerView1)
+                content.putStacked(spacerView2)
         }
     }
     
-    class Model: UITableViewCell.Model<HeroStatusCell> {
+    class Model: TableViewCellModel<HeroStatusCell> {
         @ObservableState var hero: Hero?
         @ViewState var heroHealth: String?
         @ViewState var heroMana: String?

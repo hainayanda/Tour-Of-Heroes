@@ -10,7 +10,7 @@ import Foundation
 import NamadaLayout
 import UIKit
 
-class LabelWithDetail: UIView, MoleculeLayout {
+class LabelWithDetail: UIView, MoleculeView {
     lazy var label: UILabel = build {
         $0.font = .boldSystemFont(ofSize: .x12)
         $0.numberOfLines = 1
@@ -26,20 +26,16 @@ class LabelWithDetail: UIView, MoleculeLayout {
         $0.textAlignment = .center
     }
     
-    func layoutChild(_ thisLayout: ViewLayout) {
-        thisLayout.put(detail) { detailLayout in
-            detailLayout.top.equalWithParent()
-            detailLayout.center.xAxis.equalWithParent()
-            detailLayout.left.distanceToParent(moreThan: .zero)
-            detailLayout.right.distanceToParent(moreThan: .zero)
-            detailLayout.height.equal(with: detail.font.lineHeight)
-        }
-        thisLayout.put(label) { labelLayout in
-            labelLayout.top.equal(with: detail.layout.bottom)
-            labelLayout.center.xAxis.equalWithParent()
-            labelLayout.left.distanceToParent(moreThan: .zero)
-            labelLayout.right.distanceToParent(moreThan: .zero)
-            labelLayout.height.equal(with: label.font.lineHeight)
-        }
+    func layoutContent(_ layout: LayoutInsertable) {
+        layout.put(detail)
+            .top(.equal, to: .parent)
+            .horizontal(.moreThan, to: .parent)
+            .centerX(.equal, to: .parent)
+        layout.put(label)
+            .top(.equal, to: detail.bottomAnchor)
+            .horizontal(.moreThan, to: .parent)
+            .centerX(.equal, to: .parent)
+            .bottom(.equal, to: .parent)
+        
     }
 }
