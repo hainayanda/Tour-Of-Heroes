@@ -19,11 +19,11 @@ public extension LayoutRelation where Related == InsetsConvertible {
         case .lessThan:
             return .lessThan
         case .equalTo(let insets):
-            return .equalTo(insets.asVerticalInsets.top)
+            return .equalTo(insets.vertical.top)
         case .moreThanTo(let insets):
-            return .moreThanTo(insets.asVerticalInsets.top)
+            return .moreThanTo(insets.vertical.top)
         case .lessThanTo(let insets):
-            return .lessThanTo(insets.asVerticalInsets.top)
+            return .lessThanTo(insets.vertical.top)
         }
     }
     
@@ -36,11 +36,11 @@ public extension LayoutRelation where Related == InsetsConvertible {
         case .lessThan:
             return .lessThan
         case .equalTo(let insets):
-            return .equalTo(insets.asVerticalInsets.bottom)
+            return .equalTo(insets.vertical.bottom)
         case .moreThanTo(let insets):
-            return .moreThanTo(insets.asVerticalInsets.bottom)
+            return .moreThanTo(insets.vertical.bottom)
         case .lessThanTo(let insets):
-            return .lessThanTo(insets.asVerticalInsets.bottom)
+            return .lessThanTo(insets.vertical.bottom)
         }
     }
     
@@ -53,11 +53,11 @@ public extension LayoutRelation where Related == InsetsConvertible {
         case .lessThan:
             return .lessThan
         case .equalTo(let insets):
-            return .equalTo(insets.asHorizontalInsets.left)
+            return .equalTo(insets.horizontal.left)
         case .moreThanTo(let insets):
-            return .moreThanTo(insets.asHorizontalInsets.left)
+            return .moreThanTo(insets.horizontal.left)
         case .lessThanTo(let insets):
-            return .lessThanTo(insets.asHorizontalInsets.left)
+            return .lessThanTo(insets.horizontal.left)
         }
     }
     
@@ -70,11 +70,11 @@ public extension LayoutRelation where Related == InsetsConvertible {
         case .lessThan:
             return .lessThan
         case .equalTo(let insets):
-            return .equalTo(insets.asHorizontalInsets.right)
+            return .equalTo(insets.horizontal.right)
         case .moreThanTo(let insets):
-            return .moreThanTo(insets.asHorizontalInsets.right)
+            return .moreThanTo(insets.horizontal.right)
         case .lessThanTo(let insets):
-            return .lessThanTo(insets.asHorizontalInsets.right)
+            return .lessThanTo(insets.horizontal.right)
         }
     }
 }

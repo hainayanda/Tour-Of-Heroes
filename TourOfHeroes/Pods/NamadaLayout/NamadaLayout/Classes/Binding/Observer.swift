@@ -123,9 +123,8 @@ public class WrappedPropertyObserver<Wrapped> {
     var willGetListener: ((Wrapped) -> Void)?
     var didGetListener: ((Wrapped) -> Void)?
     
-    var dispatcher: DispatchQueue = .main
+    var mainHandler: ParallelOperationHandler = MainOperationHandler()
     
-    @Atomic var throttle: TimeInterval = 0
     @Atomic var delay: TimeInterval = 0
     @Atomic var latestChangesTriggered: Date = .distantPast
     @Atomic var latestChanges: Changes<Wrapped>?
@@ -133,22 +132,17 @@ public class WrappedPropertyObserver<Wrapped> {
     
     func triggerDidSet(with changes: Changes<Wrapped>) {
         self.latestChanges = changes
-        guard !self.onDelayed else { return }
         let intervalFromLatestTrigger = -(latestChangesTriggered.timeIntervalSinceNow)
         guard intervalFromLatestTrigger > delay else {
-            onDelayed = true
             let nextTrigger = delay - intervalFromLatestTrigger
-            dispatcher.asyncAfter(deadline: .now() + nextTrigger) { [weak self] in
+            DispatchQueue.main.asyncAfter(deadline: .now() + nextTrigger) { [weak self] in
                 guard let self = self, let changes = self.latestChanges else { return }
-                self.onDelayed = false
                 self.triggerDidSet(with: changes)
             }
             return
         }
-        onDelayed = true
-        dispatcher.asyncAfter(deadline: .now() + throttle) { [weak self] in
+        mainHandler.addOperation { [weak self] in
             guard let self = self, let changes = self.latestChanges else { return }
-            self.onDelayed = false
             self.latestChanges = nil
             self.didSetListener?(changes)
             self.latestChangesTriggered = Date()
@@ -172,20 +166,13 @@ public class PropertyObservers<Observer: AnyObject, Wrapped>: WrappedPropertyObs
     }
     
     @discardableResult
-    public func throttle(by delay: TimeInterval) -> Self {
-        self.throttle = delay
-        return self
-    }
-    
-    @discardableResult
     public func willSet(then: @escaping (Observer, Changes<Wrapped>) -> Void) -> Self {
         willSetListener = asListener(closure: then)
         return self
     }
     
     @discardableResult
-    public func didSet(runIn dispatcher: DispatchQueue = .main, then: @escaping (Observer, Changes<Wrapped>) -> Void) -> Self {
-        self.dispatcher = dispatcher
+    public func didSet(then: @escaping (Observer, Changes<Wrapped>) -> Void) -> Self {
         didSetListener = asListener(closure: then)
         return self
     }

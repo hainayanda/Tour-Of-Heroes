@@ -11,7 +11,7 @@ public extension NamadaLayoutable {
     // MARK: Top Anchor
     
     @discardableResult
-    func top(_ relation: LayoutRelation<CGFloat>, to anchor: NSLayoutYAxisAnchor, priority: PriorityConvertible) -> Self {
+    func top(_ relation: LayoutRelation<CGFloat>, to anchor: NSLayoutYAxisAnchor, priority: UILayoutPriority) -> Self {
         let constraint: NSLayoutConstraint
         switch relation {
         case .moreThanTo(let space):
@@ -27,7 +27,7 @@ public extension NamadaLayoutable {
         case .equal:
             constraint = view.topAnchor.constraint(equalTo: anchor)
         }
-        constraint.priority = priority.asPriority
+        constraint.priority = priority
         constraint.identifier = "namada_\(view.uniqueKey)_top_to_\(identifier(ofSecondItemIn: constraint))"
         constructedConstraints.removeAll { $0.identifier == constraint.identifier }
         constructedConstraints.append(constraint)
@@ -40,7 +40,7 @@ public extension NamadaLayoutable {
     }
     
     @discardableResult
-    func top(_ relation: LayoutRelation<CGFloat>, to parent: ParentRelated, priority: PriorityConvertible) -> Self {
+    func top(_ relation: LayoutRelation<CGFloat>, to parent: ParentRelated, priority: UILayoutPriority) -> Self {
         guard let superview = view.superview ?? context.delegate.namadaLayout(viewHaveNoSuperview: view) else {
             context.delegate.namadaLayout(view, erroWhenLayout: .init(description: "View have no superview"))
             return self
@@ -73,7 +73,7 @@ public extension NamadaLayoutable {
     // MARK: Bottom Anchor
     
     @discardableResult
-    func bottom(_ relation: LayoutRelation<CGFloat>, to anchor: NSLayoutYAxisAnchor, priority: PriorityConvertible) -> Self {
+    func bottom(_ relation: LayoutRelation<CGFloat>, to anchor: NSLayoutYAxisAnchor, priority: UILayoutPriority) -> Self {
         let constraint: NSLayoutConstraint
         switch relation {
         case .moreThanTo(let space):
@@ -89,7 +89,7 @@ public extension NamadaLayoutable {
         case .equal:
             constraint = view.bottomAnchor.constraint(equalTo: anchor)
         }
-        constraint.priority = priority.asPriority
+        constraint.priority = priority
         constraint.identifier = "namada_\(view.uniqueKey)_bottom_to_\(identifier(ofSecondItemIn: constraint))"
         constructedConstraints.removeAll { $0.identifier == constraint.identifier }
         constructedConstraints.append(constraint)
@@ -102,7 +102,7 @@ public extension NamadaLayoutable {
     }
     
     @discardableResult
-    func bottom(_ relation: LayoutRelation<CGFloat>, to parent: ParentRelated, priority: PriorityConvertible) -> Self {
+    func bottom(_ relation: LayoutRelation<CGFloat>, to parent: ParentRelated, priority: UILayoutPriority) -> Self {
         guard let superview = view.superview ?? context.delegate.namadaLayout(viewHaveNoSuperview: view) else {
             context.delegate.namadaLayout(view, erroWhenLayout: .init(description: "View have no superview"))
             return self
@@ -135,7 +135,7 @@ public extension NamadaLayoutable {
     // MARK: Left Anchor
     
     @discardableResult
-    func left(_ relation: LayoutRelation<CGFloat>, to anchor: NSLayoutXAxisAnchor, priority: PriorityConvertible) -> Self {
+    func left(_ relation: LayoutRelation<CGFloat>, to anchor: NSLayoutXAxisAnchor, priority: UILayoutPriority) -> Self {
         let constraint: NSLayoutConstraint
         switch relation {
         case .moreThanTo(let space):
@@ -151,7 +151,7 @@ public extension NamadaLayoutable {
         case .equal:
             constraint = view.leftAnchor.constraint(equalTo: anchor)
         }
-        constraint.priority = priority.asPriority
+        constraint.priority = priority
         constraint.identifier = "namada_\(view.uniqueKey)_left_to_\(identifier(ofSecondItemIn: constraint))"
         constructedConstraints.removeAll { $0.identifier == constraint.identifier }
         constructedConstraints.append(constraint)
@@ -164,7 +164,7 @@ public extension NamadaLayoutable {
     }
     
     @discardableResult
-    func left(_ relation: LayoutRelation<CGFloat>, to parent: ParentRelated, priority: PriorityConvertible) -> Self {
+    func left(_ relation: LayoutRelation<CGFloat>, to parent: ParentRelated, priority: UILayoutPriority) -> Self {
         guard let superview = view.superview ?? context.delegate.namadaLayout(viewHaveNoSuperview: view) else {
             context.delegate.namadaLayout(view, erroWhenLayout: .init(description: "View have no superview"))
             return self
@@ -197,7 +197,7 @@ public extension NamadaLayoutable {
     // MARK: Right Anchor
     
     @discardableResult
-    func right(_ relation: LayoutRelation<CGFloat>, to anchor: NSLayoutXAxisAnchor, priority: PriorityConvertible) -> Self {
+    func right(_ relation: LayoutRelation<CGFloat>, to anchor: NSLayoutXAxisAnchor, priority: UILayoutPriority) -> Self {
         let constraint: NSLayoutConstraint
         switch relation {
         case .moreThanTo(let space):
@@ -213,7 +213,7 @@ public extension NamadaLayoutable {
         case .equal:
             constraint = view.rightAnchor.constraint(equalTo: anchor)
         }
-        constraint.priority = priority.asPriority
+        constraint.priority = priority
         constraint.identifier = "namada_\(view.uniqueKey)_right_to_\(identifier(ofSecondItemIn: constraint))"
         constructedConstraints.removeAll { $0.identifier == constraint.identifier }
         constructedConstraints.append(constraint)
@@ -226,7 +226,7 @@ public extension NamadaLayoutable {
     }
     
     @discardableResult
-    func right(_ relation: LayoutRelation<CGFloat>, to parent: ParentRelated, priority: PriorityConvertible) -> Self {
+    func right(_ relation: LayoutRelation<CGFloat>, to parent: ParentRelated, priority: UILayoutPriority) -> Self {
         guard let superview = view.superview else {
             //do something
             return self

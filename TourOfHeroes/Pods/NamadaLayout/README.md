@@ -429,6 +429,18 @@ class MoleculeView: UIView, MoleculeView {
         ...
         ...
     }
+    
+    func moleculeWillLayout() {
+        //will run before layouting
+        ...
+        ...
+    }
+    
+    func moleculeDidLayout() { 
+        //will run after layouting
+        ...
+        ...
+    }
 }
 ```
 
@@ -885,6 +897,35 @@ If you want to directly get default binded model with UICollectionView or UITabl
 ```swift
 let tableModel: UITableView.Model = table.model
 let collectionModel: UICollectionView.Model = table.model
+```
+
+### ObservableView
+
+If you have any view that you want to observe by `ViewModel` by delegate, you can just implement `ObservableView` and provide `Observer`. It will have a variable named `observer`, which is current binded ViewModel and casting it to `Observer` type. So don't forget to implement the ObserverType to your ViewModel. It's better to make the Observer extend `ViewModelObserver` since it have method to notify ViewModel that it finished Layouting and then ViewModel will automatically apply View with ViewModel if the type match:
+
+```swift
+protocol MyScreenObserver: ViewModelObserver {
+    func myScreen(_ screen: MyScreen, didPullToRefresh refreshControl: UIRefreshControl)
+}
+
+class MyScreen: UIViewController, ObservableView {
+    typealias Observer = MyScreenObserver
+    ...
+    ...
+    ...
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        layoutView()
+        
+        // will apply MyScreen with any binded ViewModel if already binded
+        // ViewModel class are implement ViewModelObserver
+        observer?.viewDidLayouted(self)
+    }
+    
+    @objc func didPullToRefresh() {
+        observer?.myScreen(self, didPullToRefresh: refreshControl)
+    }
+}
 ```
 
 ## Contribute

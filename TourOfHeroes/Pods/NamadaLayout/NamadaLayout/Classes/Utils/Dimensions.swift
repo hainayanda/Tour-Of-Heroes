@@ -11,50 +11,90 @@ import UIKit
 //MARK: Insets
 
 public protocol InsetsConvertible {
-    var asVerticalInsets: UIVerticalInsets { get }
-    var asHorizontalInsets: UIHorizontalInsets { get }
-    var asEdgeInsets: UIEdgeInsets { get }
+    var vertical: UIVerticalInsets { get }
+    var horizontal: UIHorizontalInsets { get }
+    var edges: UIEdgeInsets { get }
 }
 
-extension CGFloat: InsetsConvertible {
-    public var asVerticalInsets: UIVerticalInsets {
-        .init(insets: self)
+public protocol ConvertibleToInsets: InsetsConvertible {
+    var asCGFloat: CGFloat { get }
+    var forTop: UIEdgeInsets { get }
+    var forBottom: UIEdgeInsets { get }
+    var forLeft: UIEdgeInsets { get }
+    var forRight: UIEdgeInsets { get }
+    var topLeft: UIEdgeInsets { get }
+    var topRight: UIEdgeInsets { get }
+    var bottomLeft: UIEdgeInsets { get }
+    var bottomRight: UIEdgeInsets { get }
+    var fullTop: UIEdgeInsets { get }
+    var fullBottom: UIEdgeInsets { get }
+    var fullLeft: UIEdgeInsets { get }
+    var fullRight: UIEdgeInsets { get }
+}
+
+public extension ConvertibleToInsets {
+    var forTop: UIEdgeInsets {
+        .init(top: asCGFloat, left: 0, bottom: 0, right: 0)
     }
-    
-    public var asHorizontalInsets: UIHorizontalInsets {
-        .init(insets: self)
+    var forBottom: UIEdgeInsets {
+        .init(top: 0, left: 0, bottom: asCGFloat, right: 0)
     }
-    
-    public var asEdgeInsets: UIEdgeInsets {
-        .init(insets: self)
+    var forLeft: UIEdgeInsets {
+        .init(top: 0, left: asCGFloat, bottom: 0, right: 0)
+    }
+    var forRight: UIEdgeInsets {
+        .init(top: 0, left: 0, bottom: 0, right: asCGFloat)
+    }
+    var topLeft: UIEdgeInsets {
+        .init(top: 0, left: asCGFloat, bottom: 0, right: 0)
+    }
+    var topRight: UIEdgeInsets {
+        .init(top: asCGFloat, left: 0, bottom: 0, right: asCGFloat)
+    }
+    var bottomLeft: UIEdgeInsets {
+        .init(top: 0, left: asCGFloat, bottom: asCGFloat, right: 0)
+    }
+    var bottomRight: UIEdgeInsets {
+        .init(top: 0, left: 0, bottom: asCGFloat, right: asCGFloat)
+    }
+    var fullTop: UIEdgeInsets {
+        .init(top: asCGFloat, left: asCGFloat, bottom: 0, right: asCGFloat)
+    }
+    var fullBottom: UIEdgeInsets {
+        .init(top: 0, left: asCGFloat, bottom: asCGFloat, right: asCGFloat)
+    }
+    var fullLeft: UIEdgeInsets {
+        .init(top: asCGFloat, left: asCGFloat, bottom: asCGFloat, right: 0)
+    }
+    var fullRight: UIEdgeInsets {
+        .init(top: asCGFloat, left: 0, bottom: asCGFloat, right: asCGFloat)
+    }
+    var edges: UIEdgeInsets {
+        .init(insets: asCGFloat)
+    }
+    var vertical: UIVerticalInsets {
+        .init(insets: asCGFloat)
+    }
+    var horizontal: UIHorizontalInsets {
+        .init(insets: asCGFloat)
     }
 }
 
-extension Int: InsetsConvertible {
-    public var asVerticalInsets: UIVerticalInsets {
-        .init(insets: CGFloat(self))
-    }
-    
-    public var asHorizontalInsets: UIHorizontalInsets {
-        .init(insets: CGFloat(self))
-    }
-    
-    public var asEdgeInsets: UIEdgeInsets {
-        .init(insets: CGFloat(self))
+extension CGFloat: ConvertibleToInsets {
+    public var asCGFloat: CGFloat {
+        .init(self)
     }
 }
 
-extension Double: InsetsConvertible {
-    public var asVerticalInsets: UIVerticalInsets {
-        .init(insets: CGFloat(self))
+extension Int: ConvertibleToInsets {
+    public var asCGFloat: CGFloat {
+        .init(self)
     }
-    
-    public var asHorizontalInsets: UIHorizontalInsets {
-        .init(insets: CGFloat(self))
-    }
-    
-    public var asEdgeInsets: UIEdgeInsets {
-        .init(insets: CGFloat(self))
+}
+
+extension Double: ConvertibleToInsets {
+    public var asCGFloat: CGFloat {
+        .init(self)
     }
 }
 
@@ -62,13 +102,13 @@ public struct UIVerticalInsets: InsetsConvertible {
     public static let zero: UIVerticalInsets = .init(insets: 0)
     public let top: CGFloat
     public let bottom: CGFloat
-    public var asEdgeInsets: UIEdgeInsets {
+    public var edges: UIEdgeInsets {
         .init(top: top, left: 0, bottom: bottom, right: 0)
     }
-    public var asVerticalInsets: UIVerticalInsets {
+    public var vertical: UIVerticalInsets {
         self
     }
-    public var asHorizontalInsets: UIHorizontalInsets {
+    public var horizontal: UIHorizontalInsets {
         .zero
     }
     
@@ -87,13 +127,13 @@ public struct UIHorizontalInsets: InsetsConvertible {
     public static let zero: UIHorizontalInsets = .init(insets: 0)
     public let left: CGFloat
     public let right: CGFloat
-    public var asEdgeInsets: UIEdgeInsets {
+    public var edges: UIEdgeInsets {
         .init(top: 0, left: left, bottom: 0, right: right)
     }
-    public var asVerticalInsets: UIVerticalInsets {
+    public var vertical: UIVerticalInsets {
         .zero
     }
-    public var asHorizontalInsets: UIHorizontalInsets {
+    public var horizontal: UIHorizontalInsets {
         self
     }
     
@@ -125,8 +165,8 @@ public struct UIAxisInsets {
 }
 
 public extension UIEdgeInsets {
-    var asHorizontalInsets: UIHorizontalInsets { .init(left: left, right: right) }
-    var asVerticalInsets: UIVerticalInsets { .init(top: top, bottom: bottom) }
+    var horizontal: UIHorizontalInsets { .init(left: left, right: right) }
+    var vertical: UIVerticalInsets { .init(top: top, bottom: bottom) }
     
     init(horizontalInset: UIHorizontalInsets, verticalInset: UIVerticalInsets) {
         self.init(
@@ -175,7 +215,7 @@ public extension UIEdgeInsets {
 }
 
 extension UIEdgeInsets: InsetsConvertible {
-    public var asEdgeInsets: UIEdgeInsets {
+    public var edges: UIEdgeInsets {
         self
     }
 }

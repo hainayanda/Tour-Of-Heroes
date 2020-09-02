@@ -20,7 +20,7 @@ class HeroDetailScreenVM: ViewModel<HeroDetailScreen> {
     
     override func bind(with view: HeroDetailScreen) {
         super.bind(with: view)
-        $hero.observe(observer: self).throttle(by: .instant).didSet { model, changes in
+        $hero.observe(observer: self).didSet { model, changes in
             model.backDrop = changes.new?.imageURL
             model.view?.tableView.sections = model.constructCells(from: changes.new, andSimilar: model.similarHeroes)
         }

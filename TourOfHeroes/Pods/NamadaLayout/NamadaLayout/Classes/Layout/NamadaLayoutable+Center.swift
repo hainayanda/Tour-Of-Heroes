@@ -13,7 +13,7 @@ public extension NamadaLayoutable {
     // MARK: Center Anchor
     
     @discardableResult
-    func centerX(_ relation: LayoutRelation<CGFloat>, to anchor: NSLayoutXAxisAnchor, priority: PriorityConvertible) -> Self {
+    func centerX(_ relation: LayoutRelation<CGFloat>, to anchor: NSLayoutXAxisAnchor, priority: UILayoutPriority) -> Self {
         let constraint: NSLayoutConstraint
         switch relation {
         case .moreThanTo(let offset):
@@ -29,7 +29,7 @@ public extension NamadaLayoutable {
         case .equal:
             constraint = view.centerXAnchor.constraint(equalTo: anchor)
         }
-        constraint.priority = priority.asPriority
+        constraint.priority = priority
         constraint.identifier = "namada_\(view.uniqueKey)_center_x_to_\(identifier(ofSecondItemIn: constraint))"
         constructedConstraints.removeAll { $0.identifier == constraint.identifier }
         constructedConstraints.append(constraint)
@@ -42,7 +42,7 @@ public extension NamadaLayoutable {
     }
     
     @discardableResult
-    func centerY(_ relation: LayoutRelation<CGFloat>, to anchor: NSLayoutYAxisAnchor, priority: PriorityConvertible) -> Self {
+    func centerY(_ relation: LayoutRelation<CGFloat>, to anchor: NSLayoutYAxisAnchor, priority: UILayoutPriority) -> Self {
         let constraint: NSLayoutConstraint
         switch relation {
         case .moreThanTo(let offset):
@@ -58,7 +58,7 @@ public extension NamadaLayoutable {
         case .equal:
             constraint = view.centerYAnchor.constraint(equalTo: anchor)
         }
-        constraint.priority = priority.asPriority
+        constraint.priority = priority
         constraint.identifier = "namada_\(view.uniqueKey)_center_y_to_\(identifier(ofSecondItemIn: constraint))"
         constructedConstraints.removeAll { $0.identifier == constraint.identifier }
         constructedConstraints.append(constraint)
@@ -71,7 +71,7 @@ public extension NamadaLayoutable {
     }
     
     @discardableResult
-    func centerX(_ relation: LayoutRelation<CGFloat>, to anchor: ParentRelated, priority: PriorityConvertible) -> Self {
+    func centerX(_ relation: LayoutRelation<CGFloat>, to anchor: ParentRelated, priority: UILayoutPriority) -> Self {
         guard let superview = view.superview ?? context.delegate.namadaLayout(viewHaveNoSuperview: view) else {
             context.delegate.namadaLayout(view, erroWhenLayout: .init(description: "View have no superview"))
             return self
@@ -89,7 +89,7 @@ public extension NamadaLayoutable {
     }
     
     @discardableResult
-    func centerY(_ relation: LayoutRelation<CGFloat>, to anchor: ParentRelated, priority: PriorityConvertible) -> Self {
+    func centerY(_ relation: LayoutRelation<CGFloat>, to anchor: ParentRelated, priority: UILayoutPriority) -> Self {
         guard let superview = view.superview ?? context.delegate.namadaLayout(viewHaveNoSuperview: view) else {
             context.delegate.namadaLayout(view, erroWhenLayout: .init(description: "View have no superview"))
             return self

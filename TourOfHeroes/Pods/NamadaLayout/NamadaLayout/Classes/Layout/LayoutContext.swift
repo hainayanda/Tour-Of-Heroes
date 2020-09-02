@@ -13,7 +13,7 @@ public class LayoutContext {
     var delegate: NamadaLayoutDelegate {
         _delegate ?? DefaultNamadaLayoutDelegate.shared
     }
-    var currentPriority: UILayoutPriority = .init(999)
+    var currentPriority: UILayoutPriority = 999
     var mutatingPriority: UILayoutPriority {
         let newPriority: UILayoutPriority = .init(rawValue: currentPriority.rawValue - 1)
         currentPriority = newPriority

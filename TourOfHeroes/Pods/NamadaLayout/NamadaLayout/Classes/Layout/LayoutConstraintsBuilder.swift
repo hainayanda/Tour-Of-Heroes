@@ -19,38 +19,38 @@ public protocol NamadaLayoutable: LayoutConstraintsBuilder {
     @discardableResult
     func layoutContent(_ containerBuilder: (LayoutContainer<View>) -> Void) -> Self
     @discardableResult
-    func top(_ relation: LayoutRelation<CGFloat>, to anchor: NSLayoutYAxisAnchor, priority: PriorityConvertible) -> Self
+    func top(_ relation: LayoutRelation<CGFloat>, to anchor: NSLayoutYAxisAnchor, priority: UILayoutPriority) -> Self
     @discardableResult
-    func bottom(_ relation: LayoutRelation<CGFloat>, to anchor: NSLayoutYAxisAnchor, priority: PriorityConvertible) -> Self
+    func bottom(_ relation: LayoutRelation<CGFloat>, to anchor: NSLayoutYAxisAnchor, priority: UILayoutPriority) -> Self
     @discardableResult
-    func left(_ relation: LayoutRelation<CGFloat>, to anchor: NSLayoutXAxisAnchor, priority: PriorityConvertible) -> Self
+    func left(_ relation: LayoutRelation<CGFloat>, to anchor: NSLayoutXAxisAnchor, priority: UILayoutPriority) -> Self
     @discardableResult
-    func right(_ relation: LayoutRelation<CGFloat>, to anchor: NSLayoutXAxisAnchor, priority: PriorityConvertible) -> Self
+    func right(_ relation: LayoutRelation<CGFloat>, to anchor: NSLayoutXAxisAnchor, priority: UILayoutPriority) -> Self
     @discardableResult
-    func top(_ relation: LayoutRelation<CGFloat>, to parent: ParentRelated, priority: PriorityConvertible) -> Self
+    func top(_ relation: LayoutRelation<CGFloat>, to parent: ParentRelated, priority: UILayoutPriority) -> Self
     @discardableResult
-    func bottom(_ relation: LayoutRelation<CGFloat>, to parent: ParentRelated, priority: PriorityConvertible) -> Self
+    func bottom(_ relation: LayoutRelation<CGFloat>, to parent: ParentRelated, priority: UILayoutPriority) -> Self
     @discardableResult
-    func left(_ relation: LayoutRelation<CGFloat>, to parent: ParentRelated, priority: PriorityConvertible) -> Self
+    func left(_ relation: LayoutRelation<CGFloat>, to parent: ParentRelated, priority: UILayoutPriority) -> Self
     @discardableResult
-    func right(_ relation: LayoutRelation<CGFloat>, to parent: ParentRelated, priority: PriorityConvertible) -> Self
+    func right(_ relation: LayoutRelation<CGFloat>, to parent: ParentRelated, priority: UILayoutPriority) -> Self
     @discardableResult
-    func centerX(_ relation: LayoutRelation<CGFloat>, to anchor: NSLayoutXAxisAnchor, priority: PriorityConvertible) -> Self
+    func centerX(_ relation: LayoutRelation<CGFloat>, to anchor: NSLayoutXAxisAnchor, priority: UILayoutPriority) -> Self
     @discardableResult
-    func centerY(_ relation: LayoutRelation<CGFloat>, to anchor: NSLayoutYAxisAnchor, priority: PriorityConvertible) -> Self
+    func centerY(_ relation: LayoutRelation<CGFloat>, to anchor: NSLayoutYAxisAnchor, priority: UILayoutPriority) -> Self
     @discardableResult
-    func centerX(_ relation: LayoutRelation<CGFloat>, to parent: ParentRelated, priority: PriorityConvertible) -> Self
+    func centerX(_ relation: LayoutRelation<CGFloat>, to parent: ParentRelated, priority: UILayoutPriority) -> Self
     @discardableResult
-    func centerY(_ relation: LayoutRelation<CGFloat>, to parent: ParentRelated, priority: PriorityConvertible) -> Self
+    func centerY(_ relation: LayoutRelation<CGFloat>, to parent: ParentRelated, priority: UILayoutPriority) -> Self
     @discardableResult
-    func height(_ relation: InterRelation<NSLayoutDimension>, multiplyBy multipier: CGFloat, constant: CGFloat, priority: PriorityConvertible) -> Self
+    func height(_ relation: InterRelation<NSLayoutDimension>, multiplyBy multipier: CGFloat, constant: CGFloat, priority: UILayoutPriority) -> Self
     
     @discardableResult
-    func width(_ relation: InterRelation<NSLayoutDimension>, multiplyBy multipier: CGFloat, constant: CGFloat, priority: PriorityConvertible) -> Self
+    func width(_ relation: InterRelation<NSLayoutDimension>, multiplyBy multipier: CGFloat, constant: CGFloat, priority: UILayoutPriority) -> Self
     @discardableResult
-    func height(_ relation: InterRelation<CGFloat>, priority: PriorityConvertible) -> Self
+    func height(_ relation: InterRelation<CGFloat>, priority: UILayoutPriority) -> Self
     @discardableResult
-    func width(_ relation: InterRelation<CGFloat>, priority: PriorityConvertible) -> Self
-    func height(_ relation: InterRelation<ParentRelated>, multiplyBy multipier: CGFloat, constant: CGFloat, priority: PriorityConvertible) -> Self
-    func width(_ relation: InterRelation<ParentRelated>, multiplyBy multipier: CGFloat, constant: CGFloat, priority: PriorityConvertible) -> Self
+    func width(_ relation: InterRelation<CGFloat>, priority: UILayoutPriority) -> Self
+    func height(_ relation: InterRelation<ParentRelated>, multiplyBy multipier: CGFloat, constant: CGFloat, priority: UILayoutPriority) -> Self
+    func width(_ relation: InterRelation<ParentRelated>, multiplyBy multipier: CGFloat, constant: CGFloat, priority: UILayoutPriority) -> Self
 }

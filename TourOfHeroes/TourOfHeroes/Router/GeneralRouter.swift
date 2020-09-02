@@ -26,7 +26,7 @@ public class ConcreteHeroRouter: HeroRouter {
             $0.hero = hero
             $0.similarHeroes = similar
         }
-        heroDetailVM.apply(to: heroDetail)
+        heroDetailVM.bind(with: heroDetail)
         let navigation = screen as? UINavigationController ?? screen.navigationController
         guard let navigationVC = navigation else {
             screen.showToast(message: "Failed to open Hero Detail")

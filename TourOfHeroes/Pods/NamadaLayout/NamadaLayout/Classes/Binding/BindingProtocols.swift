@@ -35,13 +35,11 @@ public protocol ViewStateBindable {
     func unbind()
 }
 
+public protocol ViewModelObserver {
+    func viewDidLayouted(_ view: Any)
+}
+
 public protocol ObservableView {
     associatedtype Observer
     var observer: Observer? { get }
-}
-
-extension ObservableView where Self: NSObject {
-    public var observer: Observer? {
-        bindedModel() as? Observer
-    }
 }

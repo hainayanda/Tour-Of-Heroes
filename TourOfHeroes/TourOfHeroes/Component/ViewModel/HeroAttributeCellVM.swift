@@ -27,7 +27,7 @@ class HeroAttributeCellVM: CollectionViewCellModel<LargeImageWithLabelCell> {
     override func bind(with view: LargeImageWithLabelCell) {
         super.bind(with: view)
         $imageConvertible.observe(observer: self)
-            .didSet(runIn: .main) { model, changes in
+            .didSet { model, changes in
                 model.view?.cellImage.imageConvertible = changes.new
         }
         $selected.observe(observer: self)

@@ -39,6 +39,7 @@ extension UITableView {
     }
     
     public class Model: ViewModel<UITableView> {
+        var applicableSections: [Section] = []
         @ObservableState public var sections: [Section] = []
         public var insertRowAnimation: UITableView.RowAnimation = .left
         public var reloadRowAnimation: UITableView.RowAnimation = .fade
@@ -47,29 +48,20 @@ extension UITableView {
         public var reloadSectionAnimation: UITableView.RowAnimation = .top
         public var deleteSectionAnimation: UITableView.RowAnimation = .top
         public var reloadStrategy: CellReloadStrategy = .reloadLinearDifferences
-        public var unreloadedSections: [Section]?
         
         public override func bind(with view: UITableView) {
             super.bind(with: view)
             $sections.observe(observer: self).didSet { model, changes  in
-                guard let table = model.view else {
-                    model.unreloadedSections = changes.new
-                    model.$sections._wrappedValue = changes.old
-                    return
-                }
-                model.unreloadedSections = nil
-                table.registerNewCell(from: changes.new)
-                DispatchQueue.main.async { [weak model, weak table] in
-                    guard let model = model, let table = table else { return }
-                    model.reload(table, with: changes.new, oldSections: changes.old)
-                }
+                guard let table = model.view else { return }
+                let newSection = changes.new
+                table.registerNewCell(from: newSection)
+                model.applicableSections = newSection
+                model.reload(table, with: newSection, oldSections: changes.old)
             }
         }
         
         public override func didApplying(_ view: UITableView) {
             view.dataSource = self
-            guard let unreloadedSections = unreloadedSections else { return }
-            sections = unreloadedSections
         }
     }
     
@@ -395,15 +387,15 @@ extension UITableView.Model {
 extension UITableView.Model: UITableViewDataSource {
     
     public func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        self.sections[safe: section]?.cellCount ?? 0
+        self.applicableSections[safe: section]?.cellCount ?? 0
     }
     
     public func numberOfSections(in tableView: UITableView) -> Int {
-        self.sections.count
+        self.applicableSections.count
     }
     
     public func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        guard let section = self.sections[safe: indexPath.section],
+        guard let section = self.applicableSections[safe: indexPath.section],
             let cellModel = section.cells[safe: indexPath.item]
             else { return .init() }
         let cell = tableView.dequeueReusableCell(withIdentifier: cellModel.reuseIdentifier, for: indexPath)
@@ -414,7 +406,7 @@ extension UITableView.Model: UITableViewDataSource {
     public func sectionIndexTitles(for tableView: UITableView) -> [String]? {
         var titles: [String] = []
         var titleCount: Int = 0
-        self.sections.forEach {
+        self.applicableSections.forEach {
             if let title = ($0 as? UITableView.TitledSection)?.title {
                 titleCount += 1
                 titles.append(title)

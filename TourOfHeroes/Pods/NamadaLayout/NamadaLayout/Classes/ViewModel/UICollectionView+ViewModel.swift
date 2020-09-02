@@ -8,12 +8,6 @@
 import Foundation
 import UIKit
 
-public extension Collection where Indices.Iterator.Element == Index {
-    subscript (safe index: Index) -> Iterator.Element? {
-        return indices.contains(index) ? self[index] : nil
-    }
-}
-
 extension UICollectionView {
     
     public var model: UICollectionView.Model {
@@ -45,31 +39,23 @@ extension UICollectionView {
     }
     
     public class Model: ViewModel<UICollectionView> {
-        public var unreloadedSections: [Section]?
+        var applicableSections: [Section] = []
         @ObservableState public var sections: [Section] = []
         public var reloadStrategy: CellReloadStrategy = .reloadLinearDifferences
         
         public override func bind(with view: UICollectionView) {
             super.bind(with: view)
             $sections.observe(observer: self).didSet { model, changes  in
-                guard let collection = model.view else {
-                    model.unreloadedSections = changes.new
-                    model.$sections._wrappedValue = changes.old
-                    return
-                }
-                model.unreloadedSections = nil
-                collection.registerNewCell(from: changes.new)
-                DispatchQueue.main.async { [weak model, weak collection] in
-                    guard let model = model, let collection = collection else { return }
-                    model.reload(collection, with: changes.new, oldSections: changes.old)
-                }
+                guard let collection = model.view else { return }
+                let newSection = changes.new
+                collection.registerNewCell(from: newSection)
+                model.applicableSections = newSection
+                model.reload(collection, with: newSection, oldSections: changes.old)
             }
         }
         
         public override func didApplying(_ view: UICollectionView) {
             view.dataSource = self
-            guard let unreloadedSections = unreloadedSections else { return }
-            sections = unreloadedSections
         }
     }
     
@@ -469,15 +455,15 @@ extension UICollectionView.Model {
 extension UICollectionView.Model: UICollectionViewDataSource {
     
     public func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        self.sections[safe: section]?.cellCount ?? 0
+        self.applicableSections[safe: section]?.cellCount ?? 0
     }
     
     public func numberOfSections(in collectionView: UICollectionView) -> Int {
-        self.sections.count
+        self.applicableSections.count
     }
     
     public func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-        guard let section = self.sections[safe: indexPath.section],
+        guard let section = self.applicableSections[safe: indexPath.section],
             let cellModel = section.cells[safe: indexPath.item]
             else {
                 return collectionView.dequeueReusableCell(withReuseIdentifier: "Namada_Layout_plain_cell", for: indexPath)
@@ -488,9 +474,9 @@ extension UICollectionView.Model: UICollectionViewDataSource {
                 collectionView.contentSize.width,
                 collectionView.collectionViewLayout.collectionViewContentSize.width
             )
-            let contentInset: UIHorizontalInsets = collectionView.contentInset.asHorizontalInsets
+            let contentInset: UIHorizontalInsets = collectionView.contentInset.horizontal
             let sectionInset: UIHorizontalInsets = (collectionView.collectionViewLayout as? UICollectionViewFlowLayout)?
-                .sectionInset.asHorizontalInsets ?? .zero
+                .sectionInset.horizontal ?? .zero
             cellLayoutable.collectionContentWidth = contentWidth - contentInset.left -
                 contentInset.right - sectionInset.left - sectionInset.left
         }
@@ -501,7 +487,7 @@ extension UICollectionView.Model: UICollectionViewDataSource {
     public func indexTitles(for collectionView: UICollectionView) -> [String]? {
         var titles: [String] = []
         var titleCount: Int = 0
-        self.sections.forEach {
+        self.applicableSections.forEach {
             if let title = ($0 as? UICollectionView.TitledSection)?.title {
                 titleCount += 1
                 titles.append(title)
@@ -515,7 +501,7 @@ extension UICollectionView.Model: UICollectionViewDataSource {
     
     public func collectionView(_ collectionView: UICollectionView, viewForSupplementaryElementOfKind kind: String, at indexPath: IndexPath) -> UICollectionReusableView {
         if kind == UICollectionView.elementKindSectionHeader,
-            let section = sections[safe: indexPath.section] as? UICollectionView.SupplementedSection,
+            let section = applicableSections[safe: indexPath.section] as? UICollectionView.SupplementedSection,
             let header = section.header {
             let headerCell = collectionView.dequeueReusableSupplementaryView(
                 ofKind: kind,
@@ -525,7 +511,7 @@ extension UICollectionView.Model: UICollectionViewDataSource {
             header.apply(cell: headerCell as! UICollectionViewCell)
             return headerCell
         } else if kind == UICollectionView.elementKindSectionFooter,
-            let section = sections[safe: indexPath.section] as? UICollectionView.SupplementedSection,
+            let section = applicableSections[safe: indexPath.section] as? UICollectionView.SupplementedSection,
             let footer = section.footer {
             let footerCell = collectionView.dequeueReusableSupplementaryView(
                 ofKind: kind,

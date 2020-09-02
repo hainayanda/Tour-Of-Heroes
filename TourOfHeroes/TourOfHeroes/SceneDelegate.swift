@@ -20,7 +20,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         let window = UIWindow(windowScene: windowScene)
         let heroScreen = HeroMainScreen()
         let heroVM = HeroMainScreenVM()
-        heroVM.apply(to: heroScreen)
+        heroVM.bind(with: heroScreen)
         let navigationScreen = UINavigationController(rootViewController: heroScreen)
         window.rootViewController = navigationScreen
         window.makeKeyAndVisible()

@@ -10,7 +10,7 @@ import Foundation
 import UIKit
 import NamadaLayout
 
-protocol HeroMainScreenObserver {
+protocol HeroMainScreenObserver: ViewModelObserver {
     func heroMainScreenDidTapSearch(_ screen: HeroMainScreen)
     func heroMainScreen(_ screen: HeroMainScreen, didTapCellAt indexPath: IndexPath)
     func heroMainScreen(_ screen: HeroMainScreen, haveSectionAt section: Int) -> Bool
@@ -36,6 +36,7 @@ class HeroMainScreen: UIViewController, ObservableView {
         refreshControl.addTarget(self, action: #selector(didPullToRefresh), for: .valueChanged)
         view.backgroundColor = .white
         layoutView()
+        observer?.viewDidLayouted(self)
     }
     
     override func viewWillAppear(_ animated: Bool) {

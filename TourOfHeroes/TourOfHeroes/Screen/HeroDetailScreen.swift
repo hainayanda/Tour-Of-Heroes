@@ -10,7 +10,9 @@ import Foundation
 import UIKit
 import NamadaLayout
 
-class HeroDetailScreen: UIViewController {
+class HeroDetailScreen: UIViewController, ObservableView {
+    typealias Observer = ViewModelObserver
+    
     // MARK: View
     
     lazy var tableView: UITableView = build {
@@ -34,12 +36,12 @@ class HeroDetailScreen: UIViewController {
         super.viewDidLoad()
         view.backgroundColor = .white
         layoutView()
+        observer?.viewDidLayouted(self)
     }
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         setupNavigation()
-        
         view.addSubview(translucentBackDrop)
         view.sendSubviewToBack(translucentBackDrop)
         translucentBackDrop.layer.masksToBounds = true

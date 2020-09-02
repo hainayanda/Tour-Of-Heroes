@@ -8,30 +8,21 @@
 import Foundation
 import UIKit
 
-public protocol PriorityConvertible {
-    var asPriority: UILayoutPriority { get }
-}
-
-extension UILayoutPriority: PriorityConvertible {
-    public var asPriority: UILayoutPriority {
-        self
+extension UILayoutPriority: ExpressibleByFloatLiteral {
+    
+    public typealias FloatLiteralType = Double
+    
+    public init(floatLiteral value: Double) {
+        self.init(Float(value))
     }
 }
 
-extension Int: PriorityConvertible {
-    public var asPriority: UILayoutPriority {
-        .init(Float(self))
+extension UILayoutPriority: ExpressibleByIntegerLiteral {
+    
+    public typealias IntegerLiteralType = Int
+    
+    public init(integerLiteral value: Int) {
+        self.init(Float(value))
     }
-}
-
-extension Float: PriorityConvertible {
-    public var asPriority: UILayoutPriority {
-        .init(self)
-    }
-}
-
-extension Double: PriorityConvertible {
-    public var asPriority: UILayoutPriority {
-        .init(Float(self))
-    }
+    
 }

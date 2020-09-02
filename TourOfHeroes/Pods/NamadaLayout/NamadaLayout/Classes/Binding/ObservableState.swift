@@ -81,7 +81,6 @@ open class ObservableState<Wrapped>: StateObservable {
     
     public func invokeWithCurrentValue() {
         observers.forEach { observer in
-            guard !observer.onDelayed else { return }
             let changes: Changes = .init(new: _wrappedValue, old: _wrappedValue, trigger: .invoked)
             observer.triggerDidSet(with: changes)
         }

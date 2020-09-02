@@ -1,6 +1,6 @@
 //
 //  ViewState.swift
-//  FBSnapshotTestCase
+//  NamadaLayout
 //
 //  Created by Nayanda Haberty (ID) on 10/08/20.
 //

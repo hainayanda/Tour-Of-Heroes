@@ -19,12 +19,12 @@ class HeroCellVM: CollectionViewCellModel<ImageWithLabelCell> {
     override func bind(with view: ImageWithLabelCell) {
         super.bind(with: view)
         $hero.observe(observer: self)
-            .didSet(runIn: .main) { model, changes in
+            .didSet { model, changes in
                 model.imageConvertible = changes.new.imageURL
                 model.text = changes.new.localizedName
         }
         $imageConvertible.observe(observer: self)
-            .didSet(runIn: .main) { model, changes in
+            .didSet { model, changes in
                 model.view?.cellImage.imageConvertible = changes.new
         }
         $text.observe(observer: self)

@@ -12,7 +12,7 @@ public extension NamadaLayoutable {
     // MARK: Height Anchor
     
     @discardableResult
-    func height(_ relation: InterRelation<NSLayoutDimension>, multiplyBy multipier: CGFloat, constant: CGFloat, priority: PriorityConvertible) -> Self {
+    func height(_ relation: InterRelation<NSLayoutDimension>, multiplyBy multipier: CGFloat, constant: CGFloat, priority: UILayoutPriority) -> Self {
         let constraint: NSLayoutConstraint
         switch relation {
         case .moreThanTo(let dimension):
@@ -22,7 +22,7 @@ public extension NamadaLayoutable {
         case .equalTo(let dimension):
             constraint = view.heightAnchor.constraint(equalTo: dimension, multiplier: multipier, constant: constant)
         }
-        constraint.priority = priority.asPriority
+        constraint.priority = priority
         constraint.identifier = "namada_\(view.uniqueKey)_height_to_\(identifier(ofSecondItemIn: constraint))"
         constructedConstraints.removeAll { $0.identifier == constraint.identifier }
         constructedConstraints.append(constraint)
@@ -30,13 +30,13 @@ public extension NamadaLayoutable {
     }
     
     @discardableResult
-    func height(_ relation: InterRelation<NSLayoutDimension>, multiplyBy multipier: CGFloat = 0, constant: CGFloat = 0, priority: PriorityConvertible? = nil) -> Self {
+    func height(_ relation: InterRelation<NSLayoutDimension>, multiplyBy multipier: CGFloat = 0, constant: CGFloat = 0, priority: UILayoutPriority? = nil) -> Self {
         let priority = priority ?? context.mutatingPriority
         return height(relation, multiplyBy: multipier, constant: constant, priority: priority)
     }
     
     @discardableResult
-    func height(_ relation: InterRelation<ParentRelated>, multiplyBy multipier: CGFloat, constant: CGFloat, priority: PriorityConvertible) -> Self {
+    func height(_ relation: InterRelation<ParentRelated>, multiplyBy multipier: CGFloat, constant: CGFloat, priority: UILayoutPriority) -> Self {
         guard let superview = view.superview ?? context.delegate.namadaLayout(viewHaveNoSuperview: view) else {
             context.delegate.namadaLayout(view, erroWhenLayout: .init(description: "View have no superview"))
             return self
@@ -77,13 +77,13 @@ public extension NamadaLayoutable {
     }
     
     @discardableResult
-    func height(_ relation: InterRelation<ParentRelated>, multiplyBy multipier: CGFloat = 0, constant: CGFloat = 0, priority: PriorityConvertible? = nil) -> Self {
+    func height(_ relation: InterRelation<ParentRelated>, multiplyBy multipier: CGFloat = 0, constant: CGFloat = 0, priority: UILayoutPriority? = nil) -> Self {
         let priority = priority ?? context.mutatingPriority
         return height(relation, multiplyBy: multipier, constant: constant, priority: priority)
     }
     
     @discardableResult
-    func height(_ relation: InterRelation<CGFloat>, priority: PriorityConvertible) -> Self {
+    func height(_ relation: InterRelation<CGFloat>, priority: UILayoutPriority) -> Self {
         let constraint: NSLayoutConstraint
         let identifier: String
         switch relation {
@@ -97,7 +97,7 @@ public extension NamadaLayoutable {
             identifier = "equal_with_dimension"
             constraint = view.heightAnchor.constraint(equalToConstant: dimension)
         }
-        constraint.priority = priority.asPriority
+        constraint.priority = priority
         constraint.identifier = "namada_\(view.uniqueKey)_height_\(identifier)"
         constructedConstraints.removeAll { $0.identifier == constraint.identifier }
         constructedConstraints.append(constraint)
@@ -112,7 +112,7 @@ public extension NamadaLayoutable {
     // MARK: Width Anchor
     
     @discardableResult
-    func width(_ relation: InterRelation<NSLayoutDimension>, multiplyBy multipier: CGFloat, constant: CGFloat, priority: PriorityConvertible) -> Self {
+    func width(_ relation: InterRelation<NSLayoutDimension>, multiplyBy multipier: CGFloat, constant: CGFloat, priority: UILayoutPriority) -> Self {
         let constraint: NSLayoutConstraint
         switch relation {
         case .moreThanTo(let dimension):
@@ -122,7 +122,7 @@ public extension NamadaLayoutable {
         case .equalTo(let dimension):
             constraint = view.widthAnchor.constraint(equalTo: dimension, multiplier: multipier, constant: constant)
         }
-        constraint.priority = priority.asPriority
+        constraint.priority = priority
         constraint.identifier = "namada_\(view.uniqueKey)_width_to_\(identifier(ofSecondItemIn: constraint))"
         constructedConstraints.removeAll { $0.identifier == constraint.identifier }
         constructedConstraints.append(constraint)
@@ -130,12 +130,12 @@ public extension NamadaLayoutable {
     }
     
     @discardableResult
-    func width(_ relation: InterRelation<NSLayoutDimension>, multiplyBy multipier: CGFloat = 1, constant: CGFloat = 0, priority: PriorityConvertible? = nil) -> Self {
+    func width(_ relation: InterRelation<NSLayoutDimension>, multiplyBy multipier: CGFloat = 1, constant: CGFloat = 0, priority: UILayoutPriority? = nil) -> Self {
         return width(relation, multiplyBy: multipier, constant: constant, priority: priority ?? context.mutatingPriority)
     }
     
     @discardableResult
-    func width(_ relation: InterRelation<ParentRelated>, multiplyBy multipier: CGFloat, constant: CGFloat, priority: PriorityConvertible) -> Self {
+    func width(_ relation: InterRelation<ParentRelated>, multiplyBy multipier: CGFloat, constant: CGFloat, priority: UILayoutPriority) -> Self {
         guard let superview = view.superview ?? context.delegate.namadaLayout(viewHaveNoSuperview: view) else {
             context.delegate.namadaLayout(view, erroWhenLayout: .init(description: "View have no superview"))
             return self
@@ -176,13 +176,13 @@ public extension NamadaLayoutable {
     }
     
     @discardableResult
-    func width(_ relation: InterRelation<ParentRelated>, multiplyBy multipier: CGFloat = 0, constant: CGFloat = 0, priority: PriorityConvertible? = nil) -> Self {
+    func width(_ relation: InterRelation<ParentRelated>, multiplyBy multipier: CGFloat = 0, constant: CGFloat = 0, priority: UILayoutPriority? = nil) -> Self {
         let priority = priority ?? context.mutatingPriority
         return width(relation, multiplyBy: multipier, constant: constant, priority: priority)
     }
     
     @discardableResult
-    func width(_ relation: InterRelation<CGFloat>, priority: PriorityConvertible) -> Self {
+    func width(_ relation: InterRelation<CGFloat>, priority: UILayoutPriority) -> Self {
         let constraint: NSLayoutConstraint
         let identifier: String
         switch relation {
@@ -196,7 +196,7 @@ public extension NamadaLayoutable {
             identifier = "equal_with_dimension"
             constraint = view.widthAnchor.constraint(equalToConstant: dimension)
         }
-        constraint.priority = priority.asPriority
+        constraint.priority = priority
         constraint.identifier = "namada_\(view.uniqueKey)_width_\(identifier)"
         constructedConstraints.removeAll { $0.identifier == constraint.identifier }
         constructedConstraints.append(constraint)

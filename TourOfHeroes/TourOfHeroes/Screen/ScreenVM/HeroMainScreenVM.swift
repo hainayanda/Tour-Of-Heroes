@@ -166,6 +166,9 @@ class HeroMainScreenVM: ViewModel<HeroMainScreen> {
 // Mark: Action
 
 extension HeroMainScreenVM: HeroMainScreenObserver {
+    func heroMainScreenLayouted(_ screen: HeroMainScreen) {
+        apply(to: screen)
+    }
     
     func heroMainScreen(_ screen: HeroMainScreen, didTapCellAt indexPath: IndexPath) {
         guard indexPath.section == 0 else {
