@@ -42,6 +42,7 @@ extension UICollectionView {
         var applicableSections: [Section] = []
         @ObservableState public var sections: [Section] = []
         public var reloadStrategy: CellReloadStrategy = .reloadLinearDifferences
+        private var didReloadAction: ((Bool) -> Void)?
         
         public override func bind(with view: UICollectionView) {
             super.bind(with: view)
@@ -49,9 +50,14 @@ extension UICollectionView {
                 guard let collection = model.view else { return }
                 let newSection = changes.new
                 collection.registerNewCell(from: newSection)
+                let oldSection = model.applicableSections
                 model.applicableSections = newSection
-                model.reload(collection, with: newSection, oldSections: changes.old)
+                model.reload(collection, with: newSection, oldSections: oldSection, completion: model.didReloadAction)
             }
+        }
+        
+        public func didReloadCells(then: ((Bool) -> Void)?) {
+            didReloadAction = then
         }
         
         public override func didApplying(_ view: UICollectionView) {
@@ -232,27 +238,40 @@ extension UICollectionView.Model {
         return true
     }
     
-    func reload(_ collectionView: UICollectionView, with sections: [UICollectionView.Section], oldSections: [UICollectionView.Section]) {
+    func reload(
+        _ collectionView: UICollectionView,
+        with sections: [UICollectionView.Section],
+        oldSections: [UICollectionView.Section],
+        completion: ((Bool) -> Void)?) {
         guard !oldSections.isEmpty, dataIsValid(collectionView, oldData: oldSections) else {
+            CATransaction.begin()
+            CATransaction.setCompletionBlock {
+                collectionView.collectionViewLayout.invalidateLayout()
+                completion?(true)
+            }
             collectionView.reloadData()
-            collectionView.collectionViewLayout.invalidateLayout()
+            CATransaction.commit()
             return
         }
         switch self.reloadStrategy {
         case .reloadAll:
-            reloadAll(collectionView, with: sections, oldSections: oldSections)
+            reloadAll(collectionView, with: sections, oldSections: oldSections, completion: completion)
         case .reloadLinearDifferences:
-            reloadBatch(for: collectionView, with: sections, oldSections: oldSections) {
+            reloadBatch(for: collectionView, with: sections, oldSections: oldSections, reloader: {
                 linearReloadCell(for: collectionView, $0, with: $1, sectionIndex: $2)
-            }
+            }, completion: completion)
         case .reloadArangementDifferences:
-            reloadBatch(for: collectionView, with: sections, oldSections: oldSections) {
+            reloadBatch(for: collectionView, with: sections, oldSections: oldSections, reloader: {
                 arrangeReloadCell(for: collectionView, $0, with: $1, sectionIndex: $2)
-            }
+            }, completion: completion)
         }
     }
     
-    func reloadAll(_ collectionView: UICollectionView, with sections: [UICollectionView.Section], oldSections: [UICollectionView.Section]) {
+    func reloadAll(
+        _ collectionView: UICollectionView,
+        with sections: [UICollectionView.Section],
+        oldSections: [UICollectionView.Section],
+        completion: ((Bool) -> Void)?) {
         collectionView.performBatchUpdates({
             let oldCount = max(oldSections.count, 1)
             let newCount = max(sections.count, 1)
@@ -276,6 +295,9 @@ extension UICollectionView.Model {
                 collectionView.deleteSections(.init(newCount ... (oldCount - 1)))
             }
         }, completion: { success in
+            defer {
+                completion?(success)
+            }
             guard success else { return }
             collectionView.collectionViewLayout.invalidateLayout()
         })
@@ -305,7 +327,8 @@ extension UICollectionView.Model {
         for collectionView: UICollectionView,
         with sections: [UICollectionView.Section],
         oldSections: [UICollectionView.Section],
-        _ reloader: (UICollectionView.Section, UICollectionView.Section, Int) -> Void) {
+        reloader: (UICollectionView.Section, UICollectionView.Section, Int) -> Void,
+        completion: ((Bool) -> Void)?) {
         collectionView.performBatchUpdates({
             let removedIndex: Int? = firstRemovedSectionIndex(
                 for: collectionView,
@@ -329,6 +352,9 @@ extension UICollectionView.Model {
                 }
             }
         }, completion: { success in
+            defer {
+                completion?(success)
+            }
             guard success else { return }
             collectionView.collectionViewLayout.invalidateLayout()
         })

@@ -43,3 +43,15 @@ public protocol ObservableView {
     associatedtype Observer
     var observer: Observer? { get }
 }
+
+public protocol StateObservable {
+    func invokeWithCurrentValue()
+    func remove<Observer: AnyObject>(observer: Observer)
+    func removeAllObservers()
+}
+
+protocol AnyViewBinder {
+    func signalViewListener(from view: UIView, with newValue: Any, old oldValue: Any)
+    func signalStateListener(with newValue: Any, old oldValue: Any)
+    func signalApplicator(with newValue: Any)
+}

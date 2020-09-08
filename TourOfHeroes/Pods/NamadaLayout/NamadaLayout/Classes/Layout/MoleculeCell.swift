@@ -17,7 +17,7 @@ public protocol MoleculeCell: MoleculeView {
 
 open class TableMoleculeCell: UITableViewCell, MoleculeCell {
     private var _layoutPhase: CellLayoutingPhase = .firstLoad
-    public var layoutPhase: CellLayoutingPhase {
+    public private(set) var layoutPhase: CellLayoutingPhase {
         get {
             layouted ? _layoutPhase : .firstLoad
         }
@@ -110,7 +110,7 @@ open class TableMoleculeCell: UITableViewCell, MoleculeCell {
 
 open class CollectionMoleculeCell: UICollectionViewCell, MoleculeCell {
     private var _layoutPhase: CellLayoutingPhase = .firstLoad
-    public var layoutPhase: CellLayoutingPhase {
+    public private(set) var layoutPhase: CellLayoutingPhase {
         get {
             layouted ? _layoutPhase : .firstLoad
         }

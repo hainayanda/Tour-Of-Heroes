@@ -10,7 +10,7 @@ import Foundation
 extension NamadaLayoutable {
     
     func identifier(ofSecondItemIn constraint: NSLayoutConstraint) -> String {
-        let relatedKey = (constraint.secondItem as? UIView)?.uniqueKey ?? "unknown"
+        let relatedKey = (constraint.secondItem as? UIView)?.uniqueKey ?? "non_view"
         return "\(relatedKey)_\(constraint.secondAttribute.asString)"
     }
     

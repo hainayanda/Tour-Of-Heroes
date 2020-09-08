@@ -63,7 +63,7 @@ extension StatedViewModel {
         } while currentReflection != nil
         return states
     }
-
+    
 }
 
 @objc class AssociatedWrapper: NSObject {
@@ -130,12 +130,9 @@ open class ViewModel<View: NSObject>: NSObject, BindableViewModel {
     open func didUnbind(with view: View?) { }
     
     open func bind(with view: View) {
-        self.view = view
-        if let currentModel = view.bindedModel() as? Self, currentModel != self {
-            currentModel.unbind()
-        }
         let modelWrapper = AssociatedWrapper(wrapped: self)
         objc_setAssociatedObject(view,  &NSObject.AssociatedKey.model, modelWrapper, .OBJC_ASSOCIATION_RETAIN)
+        self.view = view
     }
     
     final func unbind() {

@@ -48,6 +48,7 @@ extension UITableView {
         public var reloadSectionAnimation: UITableView.RowAnimation = .top
         public var deleteSectionAnimation: UITableView.RowAnimation = .top
         public var reloadStrategy: CellReloadStrategy = .reloadLinearDifferences
+        private var didReloadAction: ((Bool) -> Void)?
         
         public override func bind(with view: UITableView) {
             super.bind(with: view)
@@ -55,9 +56,14 @@ extension UITableView {
                 guard let table = model.view else { return }
                 let newSection = changes.new
                 table.registerNewCell(from: newSection)
+                let oldSection = model.applicableSections
                 model.applicableSections = newSection
-                model.reload(table, with: newSection, oldSections: changes.old)
+                model.reload(table, with: newSection, oldSections: oldSection, completion: model.didReloadAction)
             }
+        }
+        
+        public func didReloadCells(then: ((Bool) -> Void)?) {
+            didReloadAction = then
         }
         
         public override func didApplying(_ view: UITableView) {
@@ -161,30 +167,43 @@ extension UITableView.Model {
         return true
     }
     
-    func reload(_ tableView: UITableView, with sections: [UITableView.Section], oldSections: [UITableView.Section]) {
+    func reload(
+        _ tableView: UITableView,
+        with sections: [UITableView.Section],
+        oldSections: [UITableView.Section],
+        completion: ((Bool) -> Void)?) {
         defer {
             tableView.setNeedsDisplay()
         }
         guard !oldSections.isEmpty, dataIsValid(tableView, oldData: oldSections) else {
+            CATransaction.begin()
+            CATransaction.setCompletionBlock {
+                completion?(true)
+            }
             tableView.reloadData()
+            CATransaction.commit()
             return
         }
         switch self.reloadStrategy {
         case .reloadAll:
-            reloadAll(tableView, with: sections, oldSections: oldSections)
+            reloadAll(tableView, with: sections, oldSections: oldSections, completion: completion)
             return
         case .reloadLinearDifferences:
-            reloadBatch(for: tableView, with: sections, oldSections: oldSections) {
+            reloadBatch(for: tableView, with: sections, oldSections: oldSections, reloader: {
                 linearReloadCell(for: tableView, $0, with: $1, sectionIndex: $2)
-            }
+            }, completion: completion)
         case .reloadArangementDifferences:
-            reloadBatch(for: tableView, with: sections, oldSections: oldSections) {
+            reloadBatch(for: tableView, with: sections, oldSections: oldSections, reloader: {
                 arrangeReloadCell(for: tableView, $0, with: $1, sectionIndex: $2)
-            }
+            }, completion: completion)
         }
     }
     
-    func reloadAll(_ tableView: UITableView, with sections: [UITableView.Section], oldSections: [UITableView.Section]) {
+    func reloadAll(
+        _ tableView: UITableView,
+        with sections: [UITableView.Section],
+        oldSections: [UITableView.Section],
+        completion: ((Bool) -> Void)?) {
         tableView.beginUpdates()
         let oldCount = max(oldSections.count, 1)
         let newCount = max(sections.count, 1)
@@ -208,6 +227,7 @@ extension UITableView.Model {
             tableView.deleteSections(.init(newCount ... (oldCount - 1)), with: deleteSectionAnimation)
         }
         tableView.endUpdates()
+        completion?(true)
     }
     
     func firstRemovedSectionIndex(
@@ -234,10 +254,12 @@ extension UITableView.Model {
         for tableView: UITableView,
         with sections: [UITableView.Section],
         oldSections: [UITableView.Section],
-        _ reloader: (UITableView.Section, UITableView.Section, Int) -> Void) {
+        reloader: (UITableView.Section, UITableView.Section, Int) -> Void,
+        completion: ((Bool) -> Void)?) {
         tableView.beginUpdates()
         defer {
             tableView.endUpdates()
+            completion?(true)
         }
         let removedIndex: Int? = firstRemovedSectionIndex(
             for: tableView,

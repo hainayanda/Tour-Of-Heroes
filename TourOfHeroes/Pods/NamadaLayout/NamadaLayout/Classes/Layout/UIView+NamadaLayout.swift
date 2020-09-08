@@ -24,6 +24,7 @@ public extension UIView {
     }
     
     func removeAllNamadaCreatedConstraints() {
+        removeAll(identifiedConstraints: [uniqueKey])
         let allSubviewsKeys: [String] = getAllSubViews().compactMap { $0.uniqueKey }
         mostTopParentForLayout.removeAll(identifiedConstraints: allSubviewsKeys)
     }

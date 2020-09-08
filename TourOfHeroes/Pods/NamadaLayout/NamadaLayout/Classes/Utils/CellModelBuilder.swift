@@ -17,6 +17,7 @@ public class TableCellBuilder {
         self.sections = [section]
     }
     
+    @discardableResult
     public func next<Cell: TableCellModel, Item>(type: Cell.Type, from items: [Item], _ builder: (inout Cell, Item) -> Void) -> TableCellBuilder {
         for item in items {
             var cell = Cell.init()
@@ -26,6 +27,7 @@ public class TableCellBuilder {
         return self
     }
     
+    @discardableResult
     public func nextSection(_ section: UITableView.Section = .init()) -> TableCellBuilder {
         sections.append(section)
         return self
@@ -46,6 +48,7 @@ public class CollectionCellBuilder {
         self.sections = [section]
     }
     
+    @discardableResult
     public func next<Cell: CollectionCellModel, Item>(type: Cell.Type, from items: [Item], _ builder: (inout Cell, Item) -> Void) -> CollectionCellBuilder {
         for item in items {
             var cell = Cell.init()
@@ -55,6 +58,7 @@ public class CollectionCellBuilder {
         return self
     }
     
+    @discardableResult
     public func nextSection(_ section: UICollectionView.Section = .init()) -> CollectionCellBuilder {
         sections.append(section)
         return self

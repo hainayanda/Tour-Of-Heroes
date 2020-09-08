@@ -8,12 +8,6 @@
 import Foundation
 import UIKit
 
-protocol AnyViewBinder {
-    func signalViewListener(from view: UIView, with newValue: Any, old oldValue: Any)
-    func signalStateListener(with newValue: Any, old oldValue: Any)
-    func signalApplicator(with newValue: Any)
-}
-
 public class PartialBinder<View: UIView, State>: AnyViewBinder {
     var viewListener: ((View, Changes<State>) -> Void)?
     weak var view: View?
@@ -87,6 +81,10 @@ public struct Changes<Change> {
     }
 }
 
+public extension Changes where Change: Equatable {
+    var isChanging: Bool { new != old }
+}
+
 @propertyWrapper
 struct Atomic<Wrapped> {
     
@@ -131,7 +129,11 @@ public class WrappedPropertyObserver<Wrapped> {
     @Atomic var onDelayed: Bool = false
     
     func triggerDidSet(with changes: Changes<Wrapped>) {
-        self.latestChanges = changes
+        if let latest = self.latestChanges {
+            self.latestChanges = .init(new: changes.new, old: latest.old, trigger: changes.trigger)
+        } else {
+            self.latestChanges = changes
+        }
         let intervalFromLatestTrigger = -(latestChangesTriggered.timeIntervalSinceNow)
         guard intervalFromLatestTrigger > delay else {
             let nextTrigger = delay - intervalFromLatestTrigger
@@ -201,5 +203,26 @@ public class PropertyObservers<Observer: AnyObject, Wrapped>: WrappedPropertyObs
             guard let observer = self?.observer else { return }
             closure(observer, value)
         }
+    }
+}
+
+public extension PropertyObservers where Wrapped: Equatable {
+    
+    @discardableResult
+    func didUniqueSet(then: @escaping (Observer, Changes<Wrapped>) -> Void) -> Self {
+        didSetListener = { [weak self] value in
+            guard let observer = self?.observer, value.isChanging else { return }
+            then(observer, value)
+        }
+        return self
+    }
+    
+    @discardableResult
+    func willUniqueSet(then: @escaping (Observer, Changes<Wrapped>) -> Void) -> Self {
+        willSetListener = { [weak self] value in
+            guard let observer = self?.observer, value.isChanging else { return }
+            then(observer, value)
+        }
+        return self
     }
 }

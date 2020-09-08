@@ -7,12 +7,6 @@
 
 import Foundation
 
-public protocol StateObservable {
-    func invokeWithCurrentValue()
-    func remove<Observer: AnyObject>(observer: Observer)
-    func removeAllObservers()
-}
-
 @propertyWrapper
 open class ObservableState<Wrapped>: StateObservable {
     private var observers: [WrappedPropertyObserver<Wrapped>] = []

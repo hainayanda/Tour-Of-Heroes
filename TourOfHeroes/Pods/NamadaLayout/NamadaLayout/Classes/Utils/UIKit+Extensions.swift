@@ -19,26 +19,33 @@ extension UILabel {
     public var textCompat: TextCompatible? {
         set {
             if let attributedText = newValue as? NSAttributedString {
-                self.text = nil
                 self.attributedText = attributedText
             } else if let text = newValue as? String {
                 self.text = text
-                self.attributedText = nil
             } else {
                 self.text = nil
-                self.attributedText = nil
             }
         }
         get {
-            return attributedText ?? text
+            return attributedText
         }
     }
 }
 
-public protocol TextCompatible { }
+public protocol TextCompatible {
+    var text: String { get }
+    var attributedText: NSAttributedString { get }
+}
 
-extension String: TextCompatible { }
-extension NSAttributedString: TextCompatible { }
+extension String: TextCompatible {
+    public var text: String { self }
+    
+    public var attributedText: NSAttributedString { .init(string: self) }
+}
+extension NSAttributedString: TextCompatible {
+    public var text: String { self.string }
+    public var attributedText: NSAttributedString { self }
+}
 
 extension UIImageView {
     
@@ -84,7 +91,7 @@ extension UIImageView {
         public var animating: Bool
         public var repeatCount: Int
         
-        public init(images: [UIImage], duration: TimeInterval, animating: Bool = true, repeatCount: Int) {
+        public init(images: [UIImage], duration: TimeInterval, animating: Bool = true, repeatCount: Int = 0) {
             self.images = images
             self.duration = duration
             self.animating = animating
@@ -134,57 +141,48 @@ extension UITextField {
     public var textCompat: TextCompatible? {
         set {
             if let attributedText = newValue as? NSAttributedString {
-                self.text = nil
                 self.attributedText = attributedText
             } else if let text = newValue as? String {
                 self.text = text
-                self.attributedText = nil
             } else {
                 self.text = nil
-                self.attributedText = nil
             }
         }
         get {
-            return attributedText ?? text
+            return attributedText
         }
     }
     
     public var placeholderCompat: TextCompatible? {
         set {
             if let attributedText = newValue as? NSAttributedString {
-                self.placeholder = nil
                 self.attributedPlaceholder = attributedText
             } else if let text = newValue as? String {
                 self.placeholder = text
-                self.attributedPlaceholder = nil
             } else {
                 self.placeholder = nil
-                self.attributedPlaceholder = nil
             }
         }
         get {
-            return attributedPlaceholder ?? placeholder
+            return attributedPlaceholder
         }
     }
 }
 
 extension UITextView {
-    
+
     public var textCompat: TextCompatible? {
         set {
             if let attributedText = newValue as? NSAttributedString {
-                self.text = nil
                 self.attributedText = attributedText
             } else if let text = newValue as? String {
                 self.text = text
-                self.attributedText = nil
             } else {
                 self.text = nil
-                self.attributedText = nil
             }
         }
         get {
-            return attributedText ?? text
+            return attributedText
         }
     }
 }

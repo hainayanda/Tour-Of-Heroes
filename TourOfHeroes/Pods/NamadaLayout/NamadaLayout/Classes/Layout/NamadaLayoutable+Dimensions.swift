@@ -44,33 +44,33 @@ public extension NamadaLayoutable {
         switch relation {
         case .moreThanTo(let parent):
             if parent == .parent {
-                height(.moreThanTo(superview.widthAnchor), multiplyBy: multipier, constant: constant, priority: priority)
+                height(.moreThanTo(superview.heightAnchor), multiplyBy: multipier, constant: constant, priority: priority)
             } else if #available(iOS 11.0, *) {
-                height(.moreThanTo(superview.safeAreaLayoutGuide.widthAnchor), multiplyBy: multipier, constant: constant, priority: priority)
+                height(.moreThanTo(superview.safeAreaLayoutGuide.heightAnchor), multiplyBy: multipier, constant: constant, priority: priority)
             } else {
                 let layoutMargins = superview.layoutMargins
                 let totalMargin = layoutMargins.top + layoutMargins.bottom
-                height(.moreThanTo(superview.widthAnchor), multiplyBy: multipier, constant: constant - totalMargin, priority: priority)
+                height(.moreThanTo(superview.heightAnchor), multiplyBy: multipier, constant: constant - totalMargin, priority: priority)
             }
         case .lessThanTo(let parent):
             if parent == .parent {
-                height(.lessThanTo(superview.widthAnchor), multiplyBy: multipier, constant: constant, priority: priority)
+                height(.lessThanTo(superview.heightAnchor), multiplyBy: multipier, constant: constant, priority: priority)
             } else if #available(iOS 11.0, *) {
-                height(.lessThanTo(superview.safeAreaLayoutGuide.widthAnchor), multiplyBy: multipier, constant: constant, priority: priority)
+                height(.lessThanTo(superview.safeAreaLayoutGuide.heightAnchor), multiplyBy: multipier, constant: constant, priority: priority)
             } else {
                 let layoutMargins = superview.layoutMargins
                 let totalMargin = layoutMargins.top + layoutMargins.bottom
-                height(.lessThanTo(superview.widthAnchor), multiplyBy: multipier, constant: constant - totalMargin, priority: priority)
+                height(.lessThanTo(superview.heightAnchor), multiplyBy: multipier, constant: constant - totalMargin, priority: priority)
             }
         case .equalTo(let parent):
             if parent == .parent {
-                height(.equalTo(superview.widthAnchor), multiplyBy: multipier, constant: constant, priority: priority)
+                height(.equalTo(superview.heightAnchor), multiplyBy: multipier, constant: constant, priority: priority)
             } else if #available(iOS 11.0, *) {
-                height(.equalTo(superview.safeAreaLayoutGuide.widthAnchor), multiplyBy: multipier, constant: constant, priority: priority)
+                height(.equalTo(superview.safeAreaLayoutGuide.heightAnchor), multiplyBy: multipier, constant: constant, priority: priority)
             } else {
                 let layoutMargins = superview.layoutMargins
                 let totalMargin = layoutMargins.top + layoutMargins.bottom
-                height(.equalTo(superview.widthAnchor), multiplyBy: multipier, constant: constant - totalMargin, priority: priority)
+                height(.equalTo(superview.heightAnchor), multiplyBy: multipier, constant: constant - totalMargin, priority: priority)
             }
         }
         return self

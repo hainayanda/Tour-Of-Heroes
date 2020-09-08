@@ -1,6 +1,6 @@
 # NamadaLayout
 
-NamadaLayout is a DSL framework for Swift to make Auto layout easier. (This is Beta version and have no proper Unit Test, use it at your own risk)
+NamadaLayout is a DSL framework for Swift to make Auto layout easier.
 
 [![CI Status](https://img.shields.io/travis/nayanda/NamadaLayout.svg?style=flat)](https://travis-ci.org/nayanda/NamadaLayout)
 [![Version](https://img.shields.io/cocoapods/v/NamadaLayout.svg?style=flat)](https://cocoapods.org/pods/NamadaLayout)
@@ -19,7 +19,7 @@ NamadaLayout is available through [CocoaPods](https://cocoapods.org). To install
 it, simply add the following line to your Podfile:
 
 ```ruby
-pod 'NamadaLayout', '2.0.1-beta'
+pod 'NamadaLayout'
 ```
 
 ## Author
@@ -29,6 +29,8 @@ Nayanda Haberty, nayanda1@outlook.com
 ## License
 
 NamadaLayout is available under the MIT license. See the LICENSE file for more info.
+## Example Project
+You can see the example project here or for more complex version at https://github.com/nayanda1/Tour-Of-Heroes
 
 ## Usage
 
@@ -134,10 +136,10 @@ The difference between those three is
 - `layoutContent` are used to layout content of the view ignoring it's own constraints.
 
 both accept SubLayoutingOption enumeration which is:
-- `addNew` which will add new constraints ignoring the current constraints of the view, This is the default value
+- `addNew` which will add new constraints ignoring the current constraints of the view, This is the default value and the fastest
 - `editExisting` which will edit existing same constraints relation between views created by NamadaLayout, and added constraints if it's new. Since it's literraly will check the same constraint's relation, it will be slightly slower than `addNew`
 - `removeOldAndAddNew` which will remove all current constraints created by NamadaLayout and added new constraints. Since it's literraly will check all the constraint's identifier, it will be slightly slower than `addNew`
-- `cleanLayoutAndAddNew` which will remove all subviews from it's parent which in effect will removing all of it's constraints. Since it's literraly will loop all subviews and remove it from superview, it will be slightly slower than `addNew`, but should be faster than `editExisting` and `removeOldAndAddNew`
+- `cleanLayoutAndAddNew` which will remove all current constraints created by NamadaLayout and will remove all subviews from it's parent. Since it's literraly will check all the constraint's identifier and loop all subviews and remove it from superview, it will be the slowest method but the safest.
 
 we will talk about the delegate later.
 
@@ -164,9 +166,9 @@ class ViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         layoutContent { content in
-        content.put(someView)
-            .layoutContent { someViewContent in
-                someViewContent.put(someOtherview)
+            content.put(someView)
+                .layoutContent { someViewContent in
+                    someViewContent.put(someOtherview)
             }
         }
     }
@@ -183,11 +185,11 @@ class ViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         layoutContent { content in
-        content.put(someStack)
-            .layoutContent { someStackContent in
-                someStackContent.putStacked(stackedView)
-                someStackContent.putStacked(otherStacked)
-                someStackContent.put(someOtherview)
+            content.put(someStack)
+                .layoutContent { someStackContent in
+                    someStackContent.putStacked(stackedView)
+                    someStackContent.putStacked(otherStacked)
+                    someStackContent.put(someOtherview)
             }
         }
     }
@@ -208,7 +210,42 @@ class ViewController: UIViewController {
     }
 }
 ```
+There are some method to create and add specific view which I believe cover almost if not all, default view from apple UIKit:
 
+```swift
+class ViewController: UIViewController {
+    ...
+    ...
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        layoutContent { content in
+            content.putView()
+            content.putView(assignedTo: &myViewVariable)
+            content.putLabel()
+            content.putLabel(assignedTo: &myLabelVariable)
+        }
+    }
+}
+```
+as you can see in the code, it will create view and automatically assign it to your variable if you provide any. This kind of method is available too for stack:
+
+```swift
+class ViewController: UIViewController {
+    ...
+    ...
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        layoutContent { content in
+            content.putStack().layoutContent { stackContent in
+                stackContent.putStackedView()
+                stackContent.putStackedView(assignedTo: &myViewVariable)
+                stackContent.putStackedLabel()
+                stackContent.putStackedLabel(assignedTo: &myLabelVariable)
+            }
+        }
+    }
+}
+```
 
 ### Position Constraint
 
@@ -482,7 +519,6 @@ LayoutChild will run when the cell first layout, or depends on CellLayoutBehavio
 the phase are:
 - `firstLoad`
 - `setNeedsLayout`
-- `setNeedsDisplay`
 - `reused`
 - `none`
 
@@ -670,7 +706,20 @@ content.put(searchBar)
 
 ### Observing state
 
-If you want to observe the changes of states you can always add observer into property projectedValue
+If you want to observe the changes of states you can use `@ViewState` or `@ObservableState`. The difference between two is: 
+- ObservableState cannot be binded to UIView property, so it will be good if you just want to add didSet or willSet at the property ignoring what in the View
+- ViewState can be observed and binded to UIView property. But if you want to do both, keep in mind that the Type of property should be same as the View and it will changes automatically according to the View state, so don't do assignment to the same binded property because it potentially create a stack overflow
+
+```swift
+@ViewState searchPhrase: String?
+```
+or if you want to use ObseravbleState:
+
+```swift
+@ObservableState searchPhrase: String?
+```
+
+Then:
 
 ```swift
 $searhPhrase.observe(observer: self).willSet { selfObserver, changes in
@@ -707,7 +756,8 @@ $searhPhrase.observe(observer: self)
 }
 ```
 
-Which means when multiple set is triggered with interval under one second, it will wait until one second to run next closure with latest changes, and ignore any changes in those interval.
+Which means when multiple set is triggered with interval under one second, it will wait until one second to run next closure with latest changes, and ignore any changes occures in those interval execpt the last one which will scheduled to run in the next closure run.
+Keep in mind that the willSet will not affected with delay.
 
 You can always observe get too:
 
