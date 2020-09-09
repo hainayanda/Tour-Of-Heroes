@@ -36,24 +36,34 @@ public class NamadaInjector {
     }
     
     func getInstance<T>(of anyType: T.Type, ifNoMatchUse rules: InjectionRules = .nearestType) throws -> T {
-        let provider: Provider
+        let providers: [Provider]
         switch rules {
         case .furthestType:
-            provider = try getFurthestProviderIfNoMatch(of: anyType)
+            providers = try getFurthestIfNoMatchOrPotentials(of: anyType)
         default:
-            provider = try getNearestProviderIfNoMatch(of: anyType)
+            providers = try getNearestIfNoMatchOrPotentials(of: anyType)
         }
-        guard let instance: T = provider.getInstance() as? T else {
-            throw NamadaInjectionError(description: "Instance from provider is not compatible with \(T.self)")
+        for provider in providers {
+            guard let instance: T = provider.getInstance() as? T else {
+                continue
+            }
+            return instance
         }
-        return instance
+        throw NamadaInjectionError(description: "No compatible provider for \(T.self)")
     }
     
-    func getNearestProviderIfNoMatch<T>(of anyType: T.Type) throws -> Provider {
+    func getNearestIfNoMatchOrPotentials<T>(of anyType: T.Type) throws -> [Provider] {
+        var potentialProviders: [Provider] = []
         var nearest: Provider?
-        for provider in providers where provider.isProvider(of: T.self) {
+        for provider in providers {
+            guard provider.isProvider(of: T.self) else {
+                if provider.isPotentialProvider(of: T.self) {
+                    potentialProviders.append(provider)
+                }
+                continue
+            }
             if provider.isSameType(of: anyType) {
-                return provider
+                return [provider]
             }
             if let found = nearest, provider.canBeProvided(by: found) {
                 nearest = provider
@@ -62,16 +72,23 @@ public class NamadaInjector {
             }
         }
         guard let provider = nearest else {
-            throw NamadaInjectionError(description: "No compatible provider for \(T.self)")
+            return potentialProviders.sorted { $1.canBeProvided(by: $0) }
         }
-        return provider
+        return [provider]
     }
     
-    func getFurthestProviderIfNoMatch<T>(of anyType: T.Type) throws -> Provider {
+    func getFurthestIfNoMatchOrPotentials<T>(of anyType: T.Type) throws -> [Provider] {
+        var potentialProviders: [Provider] = []
         var furthest: Provider?
-        for provider in providers where provider.isProvider(of: T.self) {
+        for provider in providers {
+            guard provider.isProvider(of: T.self) else {
+                if provider.isPotentialProvider(of: T.self) {
+                    potentialProviders.append(provider)
+                }
+                continue
+            }
             if provider.isSameType(of: anyType) {
-                return provider
+                return [provider]
             }
             if let found = furthest, found.canBeProvided(by: provider) {
                 furthest = provider
@@ -80,9 +97,9 @@ public class NamadaInjector {
             }
         }
         guard let provider = furthest else {
-            throw NamadaInjectionError(description: "No compatible provider for \(T.self)")
+            return potentialProviders.sorted { $0.canBeProvided(by: $1) }
         }
-        return provider
+        return [provider]
     }
 }
 

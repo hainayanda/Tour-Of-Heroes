@@ -10,6 +10,7 @@ import Foundation
 protocol Provider {
     func canBeProvided(by otherProvider: Provider) -> Bool
     func isProvider<TypeToProvide>(of anyType: TypeToProvide.Type) -> Bool
+    func isPotentialProvider(of anyType: Any.Type) -> Bool
     func isSameType(of anyType: Any.Type) -> Bool
     func getInstance() -> Any
 }
@@ -29,6 +30,10 @@ class NamadaProvider<T>: Provider {
     
     func isProvider<TypeToProvide>(of anyType: TypeToProvide.Type) -> Bool {
         T.self is TypeToProvide.Type
+    }
+    
+    func isPotentialProvider(of anyType: Any.Type) -> Bool {
+        anyType is T.Type
     }
     
     func isSameType(of anyType: Any.Type) -> Bool {
