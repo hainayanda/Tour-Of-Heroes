@@ -7,12 +7,15 @@
 //
 
 import UIKit
+import NamadaInject
 
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate {
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         // Override point for customization after application launch.
+        NamadaInjector.provide(for: HeroRouter.self, ConcreteHeroRouter())
+        NamadaInjector.provide(for: HeroRepositoryManager.self, option: .alwaysNew, HeroRepository())
         return true
     }
 

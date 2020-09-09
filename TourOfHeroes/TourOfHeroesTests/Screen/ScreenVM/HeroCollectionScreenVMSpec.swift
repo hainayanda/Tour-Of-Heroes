@@ -9,11 +9,13 @@
 import Foundation
 import Quick
 import Nimble
+import NamadaInject
 
 @testable import TourOfHeroes
 
-class HeroCollectionScreenVMSpec: QuickSpec {
+class HeroCollectionScreenVMSpec: BaseSpec {
     override func spec() {
+        super.spec()
         var testableVM: HeroCollectionScreenVM!
         var mockScreen: HeroCollectionScreen!
         var routerMock: HeroRouterMock!
@@ -21,8 +23,7 @@ class HeroCollectionScreenVMSpec: QuickSpec {
             beforeEach {
                 testableVM = .init()
                 mockScreen = .init()
-                routerMock = .init()
-                testableVM.heroRouter = routerMock
+                routerMock = inject(of: HeroRouter.self) as? HeroRouterMock
                 testableVM.bind(with: mockScreen)
             }
             context("positive test") {

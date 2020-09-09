@@ -12,6 +12,7 @@ target 'TourOfHeroes' do
   pod 'Nuke', '~> 9.0'
   pod "SkeletonView"
   pod 'NamadaLayout', '2.1.1'
+  pod 'NamadaInject', '0.2.2'
 
   target 'TourOfHeroesTests' do
     inherit! :search_paths

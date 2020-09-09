@@ -9,6 +9,7 @@
 import Foundation
 import NamadaLayout
 import UIKit
+import NamadaInject
 
 class HeroDetailScreenVM: ViewModel<HeroDetailScreen> {
     
@@ -16,7 +17,7 @@ class HeroDetailScreenVM: ViewModel<HeroDetailScreen> {
     @ObservableState var hero: Hero?
     var similarHeroes: [Hero] = []
     
-    lazy var heroRouter: HeroRouter = ConcreteHeroRouter.shared
+    @Injected var heroRouter: HeroRouter
     
     override func bind(with view: HeroDetailScreen) {
         super.bind(with: view)

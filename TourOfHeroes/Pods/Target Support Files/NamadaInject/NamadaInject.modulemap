@@ -1,0 +1,6 @@
+framework module NamadaInject {
+  umbrella header "NamadaInject-umbrella.h"
+
+  export *
+  module * { export * }
+}

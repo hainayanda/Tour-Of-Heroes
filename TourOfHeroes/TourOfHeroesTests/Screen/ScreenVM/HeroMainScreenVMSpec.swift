@@ -9,11 +9,13 @@
 import Foundation
 import Quick
 import Nimble
+import NamadaInject
 
 @testable import TourOfHeroes
 
-class HeroMainScreenVMSpec: QuickSpec {
+class HeroMainScreenVMSpec: BaseSpec {
     override func spec() {
+        super.spec()
         var testableVM: HeroMainScreenVM!
         var mockScreen: HeroCollectionScreen!
         var repoMock: HeroRepositoryMock!
@@ -22,11 +24,9 @@ class HeroMainScreenVMSpec: QuickSpec {
             beforeEach {
                 testableVM = .init()
                 mockScreen = .init()
-                repoMock = .init()
-                routerMock = .init()
+                repoMock = inject(of: HeroRepositoryManager.self) as? HeroRepositoryMock
+                routerMock = inject(of: HeroRouter.self) as? HeroRouterMock
                 repoMock.allHeroDelay = 0.5
-                testableVM.heroRepository = repoMock
-                testableVM.heroRouter = routerMock
                 testableVM.bind(with: mockScreen)
             }
             context("positive case") {

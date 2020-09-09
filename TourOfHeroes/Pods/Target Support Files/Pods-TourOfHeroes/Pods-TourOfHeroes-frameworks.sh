@@ -199,6 +199,7 @@ fi
 if [[ "$CONFIGURATION" == "Debug" ]]; then
   install_framework "${BUILT_PRODUCTS_DIR}/Alamofire/Alamofire.framework"
   install_framework "${BUILT_PRODUCTS_DIR}/IQKeyboardManagerSwift/IQKeyboardManagerSwift.framework"
+  install_framework "${BUILT_PRODUCTS_DIR}/NamadaInject/NamadaInject.framework"
   install_framework "${BUILT_PRODUCTS_DIR}/NamadaLayout/NamadaLayout.framework"
   install_framework "${BUILT_PRODUCTS_DIR}/Nuke/Nuke.framework"
   install_framework "${BUILT_PRODUCTS_DIR}/Realm/Realm.framework"
@@ -208,6 +209,7 @@ fi
 if [[ "$CONFIGURATION" == "Release" ]]; then
   install_framework "${BUILT_PRODUCTS_DIR}/Alamofire/Alamofire.framework"
   install_framework "${BUILT_PRODUCTS_DIR}/IQKeyboardManagerSwift/IQKeyboardManagerSwift.framework"
+  install_framework "${BUILT_PRODUCTS_DIR}/NamadaInject/NamadaInject.framework"
   install_framework "${BUILT_PRODUCTS_DIR}/NamadaLayout/NamadaLayout.framework"
   install_framework "${BUILT_PRODUCTS_DIR}/Nuke/Nuke.framework"
   install_framework "${BUILT_PRODUCTS_DIR}/Realm/Realm.framework"

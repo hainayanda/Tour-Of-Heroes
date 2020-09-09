@@ -9,6 +9,7 @@
 import Foundation
 import UIKit
 import NamadaLayout
+import NamadaInject
 
 class HeroMainScreenVM: ViewModel<HeroCollectionScreen> {
     
@@ -24,8 +25,8 @@ class HeroMainScreenVM: ViewModel<HeroCollectionScreen> {
         heroes[safe: selectedAttrIndex]?.heroes ?? []
     }
     
-    lazy var heroRepository: HeroRepositoryManager = HeroRepository()
-    lazy var heroRouter: HeroRouter = ConcreteHeroRouter.shared
+    @Injected var heroRepository: HeroRepositoryManager
+    @Injected var heroRouter: HeroRouter
     
     override func didApplying(_ view: HeroCollectionScreen) {
         reloadHeroes()

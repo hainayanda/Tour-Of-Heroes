@@ -17,9 +17,7 @@ public protocol HeroRouter {
 
 public class ConcreteHeroRouter: HeroRouter {
     
-    public static var shared: HeroRouter = ConcreteHeroRouter()
-    
-    private init() { }
+    public init() { }
     
     public func routeToHeroDetail(from screen: UIViewController, for hero: Hero, and similar: [Hero]) {
         let heroDetail = HeroDetailScreen()
