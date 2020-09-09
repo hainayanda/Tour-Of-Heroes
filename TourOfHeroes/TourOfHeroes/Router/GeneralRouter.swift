@@ -12,6 +12,7 @@ import NamadaLayout
 
 public protocol HeroRouter {
     func routeToHeroDetail(from screen: UIViewController, for hero: Hero, and similar: [Hero])
+    func routeToHeroCollection(from screen: UIViewController, for heroes: HeroCollection)
 }
 
 public class ConcreteHeroRouter: HeroRouter {
@@ -33,5 +34,19 @@ public class ConcreteHeroRouter: HeroRouter {
             return
         }
         navigationVC.pushViewController(heroDetail, animated: true)
+    }
+    
+    public func routeToHeroCollection(from screen: UIViewController, for heroes: HeroCollection) {
+        let heroCollection = HeroCollectionScreen()
+        let heroCollectionVM: HeroCollectionScreenVM = build {
+            $0.heroes = heroes
+        }
+        heroCollectionVM.bind(with: heroCollection)
+        let navigation = screen as? UINavigationController ?? screen.navigationController
+        guard let navigationVC = navigation else {
+            screen.showToast(message: "Failed to open Hero Detail")
+            return
+        }
+        navigationVC.pushViewController(heroCollection, animated: true)
     }
 }

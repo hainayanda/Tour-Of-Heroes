@@ -88,8 +88,8 @@ extension UIViewController {
             $0.numberOfLines = 1
             $0.textAlignment = .left
         }
-        let leftMargin: CGFloat = model.isHaveLeftButton ? .x96 : .x16
-        let rightMargin: CGFloat = model.isHaveRightButton ? .x96 : .x16
+        let leftMargin: CGFloat = model.isHaveLeftButton ? .x48 : .x16
+        let rightMargin: CGFloat = model.isHaveRightButton ? .x48 : .x16
         let width = view.frame.width - leftMargin - rightMargin
         let offset: CGFloat = (leftMargin - rightMargin) / 2
         let container: UIView = .init(frame: .init(origin: .zero, size: .init(width: .x1024, height: .x24)))
@@ -114,9 +114,10 @@ extension UIViewController {
     }
     
     private func getRightButtonItem(_ model: NavigationBarModel) -> UIBarButtonItem {
-        guard let buttonClosure = model.rightButtonAction else {
+        guard let buttonAction = model.rightButtonAction else {
             fatalError("Something must be wrong since it's can run this line of code")
         }
+        let buttonClosure = BarButtonClosure(closure: buttonAction)
         objc_setAssociatedObject(self, "[\(arc4random())]", buttonClosure, .OBJC_ASSOCIATION_RETAIN)
         if let icon = model.rightButtonIcon {
             return .init(
@@ -263,7 +264,7 @@ public extension UIViewController {
         let toastContainer: UIView = build {
             $0.backgroundColor = UIColor.black.withAlphaComponent(.semiClear)
             $0.alpha = .clear
-            $0.layer.cornerRadius = .x24
+            $0.layer.cornerRadius = .x12
             $0.clipsToBounds  =  true
         }
         layoutToast(toastContainer, message)

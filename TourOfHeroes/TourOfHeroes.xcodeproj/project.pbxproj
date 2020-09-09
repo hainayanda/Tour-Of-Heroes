@@ -8,7 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		7301F9F224F25433006ADAEB /* CollectionSkeletonCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7301F9F124F25433006ADAEB /* CollectionSkeletonCell.swift */; };
-		7301F9F424F255B0006ADAEB /* HeroMainScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7301F9F324F255B0006ADAEB /* HeroMainScreen.swift */; };
+		7301F9F424F255B0006ADAEB /* HeroCollectionScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7301F9F324F255B0006ADAEB /* HeroCollectionScreen.swift */; };
 		73AA01F424EFDE16003A9DD2 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 73AA01F324EFDE16003A9DD2 /* AppDelegate.swift */; };
 		73AA01F624EFDE16003A9DD2 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 73AA01F524EFDE16003A9DD2 /* SceneDelegate.swift */; };
 		73AA01FD24EFDE18003A9DD2 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 73AA01FC24EFDE18003A9DD2 /* Assets.xcassets */; };
@@ -49,6 +49,8 @@
 		73E0FF9C24F3DC1800BA9A64 /* PhotoWithDetailCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 73E0FF9B24F3DC1800BA9A64 /* PhotoWithDetailCell.swift */; };
 		73E0FF9F24F3E97A00BA9A64 /* GeneralRouter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 73E0FF9E24F3E97A00BA9A64 /* GeneralRouter.swift */; };
 		73E0FFA124F3EC7400BA9A64 /* RoleCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 73E0FFA024F3EC7400BA9A64 /* RoleCell.swift */; };
+		73E605C42508817000D56B0E /* HeroCollectionScreenVM.swift in Sources */ = {isa = PBXBuildFile; fileRef = 73E605C32508817000D56B0E /* HeroCollectionScreenVM.swift */; };
+		73E605C625088AC500D56B0E /* HeroCollectionScreenVMSpec.swift in Sources */ = {isa = PBXBuildFile; fileRef = 73E605C525088AC500D56B0E /* HeroCollectionScreenVMSpec.swift */; };
 		73F22B4B24F0067700B5D14A /* HeroMainScreenVM.swift in Sources */ = {isa = PBXBuildFile; fileRef = 73F22B4A24F0067700B5D14A /* HeroMainScreenVM.swift */; };
 		73F22B5124F006F500B5D14A /* LargeImageWithLabelCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 73F22B5024F006F500B5D14A /* LargeImageWithLabelCell.swift */; };
 		73F22B5424F00AED00B5D14A /* APIPromise.swift in Sources */ = {isa = PBXBuildFile; fileRef = 73F22B5324F00AED00B5D14A /* APIPromise.swift */; };
@@ -84,7 +86,7 @@
 		2EBB29B0CB68EC606E853827 /* Pods_TourOfHeroes_TourOfHeroesUITests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_TourOfHeroes_TourOfHeroesUITests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		316AD30B8B6106AA68295F49 /* Pods-TourOfHeroesTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-TourOfHeroesTests.release.xcconfig"; path = "Target Support Files/Pods-TourOfHeroesTests/Pods-TourOfHeroesTests.release.xcconfig"; sourceTree = "<group>"; };
 		7301F9F124F25433006ADAEB /* CollectionSkeletonCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CollectionSkeletonCell.swift; sourceTree = "<group>"; };
-		7301F9F324F255B0006ADAEB /* HeroMainScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HeroMainScreen.swift; sourceTree = "<group>"; };
+		7301F9F324F255B0006ADAEB /* HeroCollectionScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HeroCollectionScreen.swift; sourceTree = "<group>"; };
 		73AA01F024EFDE16003A9DD2 /* TourOfHeroes.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = TourOfHeroes.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		73AA01F324EFDE16003A9DD2 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		73AA01F524EFDE16003A9DD2 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
@@ -131,6 +133,8 @@
 		73E0FF9B24F3DC1800BA9A64 /* PhotoWithDetailCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoWithDetailCell.swift; sourceTree = "<group>"; };
 		73E0FF9E24F3E97A00BA9A64 /* GeneralRouter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GeneralRouter.swift; sourceTree = "<group>"; };
 		73E0FFA024F3EC7400BA9A64 /* RoleCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RoleCell.swift; sourceTree = "<group>"; };
+		73E605C32508817000D56B0E /* HeroCollectionScreenVM.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HeroCollectionScreenVM.swift; sourceTree = "<group>"; };
+		73E605C525088AC500D56B0E /* HeroCollectionScreenVMSpec.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HeroCollectionScreenVMSpec.swift; sourceTree = "<group>"; };
 		73F22B4A24F0067700B5D14A /* HeroMainScreenVM.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HeroMainScreenVM.swift; sourceTree = "<group>"; };
 		73F22B5024F006F500B5D14A /* LargeImageWithLabelCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LargeImageWithLabelCell.swift; sourceTree = "<group>"; };
 		73F22B5324F00AED00B5D14A /* APIPromise.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = APIPromise.swift; sourceTree = "<group>"; };
@@ -269,6 +273,7 @@
 			children = (
 				73CD141C24F4CB1400D038E9 /* HeroMainScreenVMSpec.swift */,
 				73CD142424F4F7E200D038E9 /* HeroDetailScreenVMSpec.swift */,
+				73E605C525088AC500D56B0E /* HeroCollectionScreenVMSpec.swift */,
 			);
 			path = ScreenVM;
 			sourceTree = "<group>";
@@ -350,6 +355,7 @@
 			children = (
 				73F22B4A24F0067700B5D14A /* HeroMainScreenVM.swift */,
 				73B61E7624F34FD8008C601B /* HeroDetailScreenVM.swift */,
+				73E605C32508817000D56B0E /* HeroCollectionScreenVM.swift */,
 			);
 			path = ScreenVM;
 			sourceTree = "<group>";
@@ -367,7 +373,7 @@
 			isa = PBXGroup;
 			children = (
 				73F22B4924F0066000B5D14A /* ScreenVM */,
-				7301F9F324F255B0006ADAEB /* HeroMainScreen.swift */,
+				7301F9F324F255B0006ADAEB /* HeroCollectionScreen.swift */,
 				73B61E7024F34314008C601B /* HeroDetailScreen.swift */,
 			);
 			path = Screen;
@@ -717,7 +723,7 @@
 				73CE795F24F12F750022427E /* UIViewController+Extensions.swift in Sources */,
 				73B61E8024F37800008C601B /* LabelWithDetail.swift in Sources */,
 				73B61E7924F368C8008C601B /* KeyedContainerHelper.swift in Sources */,
-				7301F9F424F255B0006ADAEB /* HeroMainScreen.swift in Sources */,
+				7301F9F424F255B0006ADAEB /* HeroCollectionScreen.swift in Sources */,
 				73CE797624F15FC20022427E /* HeroAttributeCellVM.swift in Sources */,
 				73CE795224F0D1ED0022427E /* RepositoryPromise.swift in Sources */,
 				73B61E7B24F36FD6008C601B /* HeroHeaderCell.swift in Sources */,
@@ -731,6 +737,7 @@
 				73E0FF9A24F3DB7800BA9A64 /* SimilarHeroCell.swift in Sources */,
 				73F22B6124F00FE500B5D14A /* HeroAPI.swift in Sources */,
 				73F22B5E24F00DFA00B5D14A /* ThreadHelper.swift in Sources */,
+				73E605C42508817000D56B0E /* HeroCollectionScreenVM.swift in Sources */,
 				73CE796C24F154A50022427E /* NavigatableTitledHeader.swift in Sources */,
 				73CE797224F15B7E0022427E /* ImageConvertible.swift in Sources */,
 				73CE795824F0FDA30022427E /* APIQueueHandler.swift in Sources */,
@@ -759,6 +766,7 @@
 				73CD141D24F4CB1400D038E9 /* HeroMainScreenVMSpec.swift in Sources */,
 				73AA020B24EFDE19003A9DD2 /* TourOfHeroesTests.swift in Sources */,
 				73CD141F24F4D27700D038E9 /* HeroRouter.swift in Sources */,
+				73E605C625088AC500D56B0E /* HeroCollectionScreenVMSpec.swift in Sources */,
 				73CD141B24F4C62800D038E9 /* HeroRepositoryMock.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

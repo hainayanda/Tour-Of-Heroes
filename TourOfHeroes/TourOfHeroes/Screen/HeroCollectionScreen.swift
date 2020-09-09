@@ -1,5 +1,5 @@
 //
-//  CollectionScreen.swift
+//  HeroCollectionScreen.swift
 //  TourOfHeroes
 //
 //  Created by Nayanda Haberty (ID) on 23/08/20.
@@ -10,16 +10,16 @@ import Foundation
 import UIKit
 import NamadaLayout
 
-protocol HeroMainScreenObserver: ViewModelObserver {
-    func heroMainScreenDidTapSearch(_ screen: HeroMainScreen)
-    func heroMainScreen(_ screen: HeroMainScreen, didTapCellAt indexPath: IndexPath)
-    func heroMainScreen(_ screen: HeroMainScreen, haveSectionAt section: Int) -> Bool
-    func heroMainScreen(_ screen: HeroMainScreen, heightOf section: Int) -> CGFloat
-    func heroMainScreen(_ screen: HeroMainScreen, didPullToRefresh refreshControl: UIRefreshControl)
+protocol HeroCollectionScreenObserver: ViewModelObserver {
+    func heroCollectionScreenWillAppear(_ screen: HeroCollectionScreen)
+    func heroCollectionScreen(_ screen: HeroCollectionScreen, didTapCellAt indexPath: IndexPath)
+    func heroCollectionScreen(_ screen: HeroCollectionScreen, haveHeaderSectionAt section: Int) -> Bool
+    func heroCollectionScreen(_ screen: HeroCollectionScreen, heightOf section: Int) -> CGFloat
+    func heroCollectionScreen(_ screen: HeroCollectionScreen, didPullToRefresh refreshControl: UIRefreshControl)
 }
 
-class HeroMainScreen: UIViewController, ObservableView {
-    typealias Observer = HeroMainScreenObserver
+class HeroCollectionScreen: UIViewController, ObservableView {
+    typealias Observer = HeroCollectionScreenObserver
     
     // MARK: View
     lazy var collectionLayout: UICollectionViewFlowLayout = .init()
@@ -27,7 +27,7 @@ class HeroMainScreen: UIViewController, ObservableView {
     lazy var refreshControl: UIRefreshControl = .init()
     
     @objc func didPullToRefresh() {
-        observer?.heroMainScreen(self, didPullToRefresh: refreshControl)
+        observer?.heroCollectionScreen(self, didPullToRefresh: refreshControl)
     }
     
     override func viewDidLoad() {
@@ -41,15 +41,7 @@ class HeroMainScreen: UIViewController, ObservableView {
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        preLayoutNavigation()
-        layoutNavigation {
-            $0.title = "Heroes"
-            $0.rightButtonAction = { [weak self] _ in
-                guard let self = self else { return }
-                self.observer?.heroMainScreenDidTapSearch(self)
-            }
-            $0.rightButtonText = "Search"
-        }
+        observer?.heroCollectionScreenWillAppear(self)
     }
     
     func layoutView() {
@@ -77,19 +69,19 @@ class HeroMainScreen: UIViewController, ObservableView {
     }
 }
 
-extension HeroMainScreen: UICollectionViewDelegateFlowLayout {
+extension HeroCollectionScreen: UICollectionViewDelegateFlowLayout {
     
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, referenceSizeForHeaderInSection section: Int) -> CGSize {
         guard let observer = self.observer else { return .zero }
-        return !observer.heroMainScreen(self, haveSectionAt: section) ?
+        return !observer.heroCollectionScreen(self, haveHeaderSectionAt: section) ?
             .zero
             : .init(
                 width: collectionView.frame.width,
-                height: observer.heroMainScreen(self, heightOf: section)
+                height: observer.heroCollectionScreen(self, heightOf: section)
         )
     }
     
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
-        observer?.heroMainScreen(self, didTapCellAt: indexPath)
+        observer?.heroCollectionScreen(self, didTapCellAt: indexPath)
     }
 }

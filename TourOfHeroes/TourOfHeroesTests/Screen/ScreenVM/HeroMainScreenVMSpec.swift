@@ -15,7 +15,7 @@ import Nimble
 class HeroMainScreenVMSpec: QuickSpec {
     override func spec() {
         var testableVM: HeroMainScreenVM!
-        var mockScreen: HeroMainScreen!
+        var mockScreen: HeroCollectionScreen!
         var repoMock: HeroRepositoryMock!
         var routerMock: HeroRouterMock!
         describe("view model behaviour") {
@@ -117,14 +117,24 @@ class HeroMainScreenVMSpec: QuickSpec {
                             expect(hero).to(equal(selectedHero))
                             expect(heroes).to(equal(selectedGroup.heroes))
                         }
-                        testableVM.heroMainScreen(mockScreen, didTapCellAt: .init(row: randomSelect, section: 1))
+                        testableVM.heroCollectionScreen(mockScreen, didTapCellAt: .init(row: randomSelect, section: 1))
                     }
                     it("should select hero and reload content when attribute selected") {
                         let randomSelect = Int.random(in: 0..<grouped.count)
                         let selectedGroup = grouped[randomSelect]
-                        testableVM.heroMainScreen(mockScreen, didTapCellAt: .init(row: randomSelect, section: 0))
+                        testableVM.heroCollectionScreen(mockScreen, didTapCellAt: .init(row: randomSelect, section: 0))
                         expect(testableVM.selectedAttrIndex).to(equal(randomSelect))
                         expect(testableVM.selectedHeroes).to(equal(selectedGroup.heroes))
+                    }
+                    it("should go to all heroes page with same attributes") {
+                        var routed: Bool = false
+                        routerMock.onRouteToHeroCollection = { screen, heroCollection in
+                            expect(screen).to(equal(mockScreen))
+                            expect(heroCollection.heroes).to(equal(testableVM.selectedHeroes))
+                            routed = true
+                        }
+                        testableVM.goToPage(for: testableVM.heroes[testableVM.selectedAttrIndex])
+                        expect(routed).to(beTrue())
                     }
                 }
             }

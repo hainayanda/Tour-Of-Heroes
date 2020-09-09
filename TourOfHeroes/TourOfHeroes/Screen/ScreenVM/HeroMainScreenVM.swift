@@ -10,7 +10,7 @@ import Foundation
 import UIKit
 import NamadaLayout
 
-class HeroMainScreenVM: ViewModel<HeroMainScreen> {
+class HeroMainScreenVM: ViewModel<HeroCollectionScreen> {
     
     @ObservableState var heroes: [HeroCollection] = []
     @ObservableState var loading: Bool = true
@@ -27,11 +27,11 @@ class HeroMainScreenVM: ViewModel<HeroMainScreen> {
     lazy var heroRepository: HeroRepositoryManager = HeroRepository()
     lazy var heroRouter: HeroRouter = ConcreteHeroRouter.shared
     
-    override func didApplying(_ view: HeroMainScreen) {
+    override func didApplying(_ view: HeroCollectionScreen) {
         reloadHeroes()
     }
     
-    override func bind(with view: HeroMainScreen) {
+    override func bind(with view: HeroCollectionScreen) {
         super.bind(with: view)
         $heroes.observe(observer: self)
             .didSet { model, changes in
@@ -165,12 +165,23 @@ class HeroMainScreenVM: ViewModel<HeroMainScreen> {
 
 // Mark: Action
 
-extension HeroMainScreenVM: HeroMainScreenObserver {
-    func heroMainScreenLayouted(_ screen: HeroMainScreen) {
+extension HeroMainScreenVM: HeroCollectionScreenObserver {
+    func heroCollectionScreenWillAppear(_ screen: HeroCollectionScreen) {
+        screen.preLayoutNavigation()
+        screen.layoutNavigation {
+            $0.title = "Heroes"
+            $0.rightButtonAction = { [weak screen] _ in
+                guard let screen = screen else { return }
+                screen.showToast(message: "Not implemented yet")
+            }
+            $0.rightButtonText = "Search"
+        }
+    }
+    func heroMainScreenLayouted(_ screen: HeroCollectionScreen) {
         apply(to: screen)
     }
     
-    func heroMainScreen(_ screen: HeroMainScreen, didTapCellAt indexPath: IndexPath) {
+    func heroCollectionScreen(_ screen: HeroCollectionScreen, didTapCellAt indexPath: IndexPath) {
         guard indexPath.section == 0 else {
             if let selectedHero = selectedHeroes[safe: indexPath.item] {
                 goToPage(for: selectedHero)
@@ -180,21 +191,16 @@ extension HeroMainScreenVM: HeroMainScreenObserver {
         selectedAttrIndex = indexPath.item
     }
     
-    func heroMainScreen(_ screen: HeroMainScreen, haveSectionAt section: Int) -> Bool {
+    func heroCollectionScreen(_ screen: HeroCollectionScreen, haveHeaderSectionAt section: Int) -> Bool {
         section == 1
     }
     
-    func heroMainScreen(_ screen: HeroMainScreen, heightOf section: Int) -> CGFloat {
+    func heroCollectionScreen(_ screen: HeroCollectionScreen, heightOf section: Int) -> CGFloat {
         .x160
     }
     
-    func heroMainScreen(_ screen: HeroMainScreen, didPullToRefresh refreshControl: UIRefreshControl) {
+    func heroCollectionScreen(_ screen: HeroCollectionScreen, didPullToRefresh refreshControl: UIRefreshControl) {
         reloadHeroes()
-    }
-    
-    func heroMainScreenDidTapSearch(_ screen: HeroMainScreen) {
-        screen.showToast(message: "Not implemented yet")
-        // MARK: Go to search
     }
     
     func goToPage(for hero: Hero) {
@@ -203,12 +209,12 @@ extension HeroMainScreenVM: HeroMainScreenObserver {
     }
     
     func goToPage(for heroes: HeroCollection) {
-        view?.showToast(message: "Not implemented yet")
-        // MARK: Go to Collection
+        guard let view = view else { return }
+        heroRouter.routeToHeroCollection(from: view, for: heroes)
     }
 }
 
-class HeroCollection: Equatable {
+public class HeroCollection: Equatable {
     var primaryAttribute: String
     var attributeDescription: String
     var heroes: [Hero] = []
@@ -218,7 +224,7 @@ class HeroCollection: Equatable {
         self.attributeDescription = description
     }
     
-    static func == (lhs: HeroCollection, rhs: HeroCollection) -> Bool {
+    public static func == (lhs: HeroCollection, rhs: HeroCollection) -> Bool {
         lhs.primaryAttribute == rhs.primaryAttribute
             && lhs.attributeDescription == rhs.attributeDescription
             && lhs.heroes == rhs.heroes
